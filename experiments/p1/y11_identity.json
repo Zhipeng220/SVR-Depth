@@ -1,0 +1,21 @@
+{
+  "version": "Y11-Fallback-1.0.1",
+  "y09_protocol_sha256": "a23b1124ad3b7c1c87d98e105a783c0f8c65ba4ba2930b9d730928ecd8704119",
+  "y09_summary_sha256": "2c87641e374a10fce8d321e87c1c09249a46be8b6e8eadb28099a9e60a72a91e",
+  "source_sha256": {
+    "experiments/p1/gt4a2_exp1_train_eval.py": "c24441cb405465c1a16a86127b51aade8f9af69b5d368f43d830d0e759ee3d7f",
+    "experiments/p1/gt4a2_y08cal_y09pareto.py": "ab680c054b3a9c09f6c935c2e4fb12c9995880207145e5adc8ba865ee0cf765e",
+    "experiments/p1/y08y09_models.py": "3b5e24786ab61c20c5b780e01cef2006a1a7868fa88b071ea63588d696d0e5b8",
+    "experiments/p1/y08y09_common.py": "17756ccfee812a2c973be6d7c4905a1d71e42a434f39c25632c0dad76f91ccf3",
+    "experiments/p1/gt4a2_y04a_native_pre_readout_eval.py": "6fbe1a2464a7f9756f9ea68cf05f3476a89b005b8e6f889dd1a0093f231c3116",
+    "experiments/p1/test_y08y09.py": "767d0d08b1dca8cb969d2366af59081656a8c60b48019c840b59bbb1281bf80b",
+    "experiments/p1/gt2_fixed_clip_repair_train.py": "bf7cd2021b1d0bbf66d75502dba6afed87f4c8ff3ef58ff7b18f56ac28044192",
+    "velodepth/models/decoder_velo.py": "35ca12629accd1a2a77595f505165fa17dffab07c763a8b639604285b94bdb08",
+    "velodepth/models/persistent_feature_repair.py": "6dfc8b0c5565ea9139b8c266c5ef337b3309ce0fde2f365428fc44390b84117c",
+    "velodepth/models/encoder_velo.py": "3c5aa2a3a6dce03b68373953037fe8a0313a2cab36d66e5e3b88a56ec4a7ba8a",
+    "velodepth/models/velodepth.py": "739c5f27a749174987b9a36edaac32fb98070e87dbef0a0a52f7430d61149479"
+  },
+  "P_file_sha256": "77a86cdf523f776608b6b591d6c6552002b90398e85d00d3a3fe29afe14a0a24",
+  "O_multi_file_sha256": "558e1850d7b08939bef0db0eb4f7a48fdff8a2fb58417cd4c380ee3c6a6f6948",
+  "O_fast_tensor_sha256": "42bb37dd78d1825f8e35074384536cc27b4c26a36a3f91e8c8cdfbe174ec61e5"
+}

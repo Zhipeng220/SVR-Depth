@@ -1,0 +1,10 @@
+{
+  "experiment": "M02",
+  "test_unsealed": false,
+  "selection_before_test": false,
+  "m00_state_and_depth_audit_complete": false,
+  "development_access_equal": false,
+  "development_selection_evidence": "/absolute/path/development_selection_record.json",
+  "candidate_counts": {"A": 3, "O_fast": 3, "O_multi": 3, "P": 3},
+  "points": []
+}

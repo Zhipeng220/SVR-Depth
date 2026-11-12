@@ -1,0 +1,174 @@
+import copy
+import json
+import os
+import sys
+import traceback
+from pathlib import Path
+
+import torch
+from velodepth.models.velodepth import VeloDepth
+
+
+def assert_close(a, b, message):
+    if not torch.allclose(a, b, atol=1e-7, rtol=0):
+        raise AssertionError(message)
+
+
+def main():
+    torch.manual_seed(20261023)
+    torch.set_num_threads(4)
+
+    snapshot = Path(os.environ["VDEEP_SNAPSHOT"])
+    config_path = snapshot / "config.json"
+
+    print("STAGE 1: construct model with repair head", flush=True)
+
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    config = copy.deepcopy(config)
+    config["model"]["persistent_feature_repair"] = {
+        "enabled": True,
+        "mode": "post_readout",
+        "bottleneck": 32,
+    }
+
+    model = VeloDepth(config)
+    model.cpu()
+    model.eval()
+    assert model is not None, "模型对象异常"
+    radial = model.pixel_decoder.radial_module
+    head = model.pixel_decoder.persistent_feature_repair
+
+    assert head is not None
+    assert radial is not None
+
+    print("模型构造：PASS", flush=True)
+
+    # ----------------------------------------------------------
+    # Test 1: actual repair head preserves shapes and starts as
+    # an exact identity mapping.
+    # ----------------------------------------------------------
+    print("STAGE 2: test actual repair head initialization", flush=True)
+
+    head.eval()
+    base = [
+        torch.randn(1, 512, 32, 32),
+        torch.randn(1, 512, 16, 16),
+        torch.randn(1, 512, 8, 8),
+        torch.randn(1, 512, 4, 4),
+    ]
+
+    with torch.no_grad():
+        identity_out = head(base)
+
+    assert len(identity_out) == len(base)
+    assert all(x.shape == y.shape for x, y in zip(base, identity_out))
+
+    identity_diff = max(
+        (x - y).abs().max().item()
+        for x, y in zip(base, identity_out)
+    )
+    print("修复头初始最大绝对差：", identity_diff, flush=True)
+    assert identity_diff == 0.0
+    print("修复头初始化：PASS", flush=True)
+
+    # ----------------------------------------------------------
+    # Test 2: test actual RadialModule.forward_fast branch
+    # placement with deterministic propagation/readout stubs.
+    # This isolates C/D semantics from optical flow and image IO.
+    # ----------------------------------------------------------
+    print("STAGE 3: test A/C/D branch semantics", flush=True)
+
+    base_features = [
+        torch.randn(1, 512, 8, 8),
+        torch.randn(1, 512, 8, 8),
+        torch.randn(1, 512, 8, 8),
+        torch.randn(1, 512, 8, 8),
+    ]
+
+    # Replace only the propagation and readout boundaries.
+    # forward_fast itself remains the actual project implementation.
+    radial.propagate_features = (
+        lambda *args, **kwargs: [x.clone() for x in base_features]
+    )
+    radial.readout_fast = (
+        lambda xs: (xs[0][:, :1].clone(), xs[0][:, :1].clone())
+    )
+
+    def deterministic_repair(features):
+        return [x + 0.125 for x in features]
+
+    with torch.no_grad():
+        # A: original path
+        a_depth, a_conf, a_state = radial.forward_fast(
+            [], [], None, None,
+            feature_repair=None,
+            feature_repair_mode="off",
+        )
+
+        # C: repaired features participate in current readout
+        c_depth, c_conf, c_state = radial.forward_fast(
+            [], [], None, None,
+            feature_repair=deterministic_repair,
+            feature_repair_mode="pre_readout",
+        )
+
+        # D: current readout is computed before state repair
+        d_depth, d_conf, d_state = radial.forward_fast(
+            [], [], None, None,
+            feature_repair=deterministic_repair,
+            feature_repair_mode="post_readout",
+        )
+
+    # A invariants
+    for original, returned in zip(base_features, a_state):
+        assert_close(original, returned, "A altered the propagated state")
+
+    # C invariants
+    assert_close(
+        c_depth, a_depth + 0.125,
+        "C did not use repaired features for current depth readout",
+    )
+    assert_close(
+        c_conf, a_conf + 0.125,
+        "C did not use repaired features for current confidence readout",
+    )
+    for original, returned in zip(base_features, c_state):
+        assert_close(
+            returned, original + 0.125,
+            "C did not return repaired state",
+        )
+
+    # D invariants
+    assert_close(
+        d_depth, a_depth,
+        "D changed current depth readout",
+    )
+    assert_close(
+        d_conf, a_conf,
+        "D changed current confidence readout",
+    )
+    for original, returned in zip(base_features, d_state):
+        assert_close(
+            returned, original + 0.125,
+            "D did not return repaired state",
+        )
+
+    print("A: original output/state preserved: PASS", flush=True)
+    print("C: current output uses repaired features: PASS", flush=True)
+    print("D: current output unchanged: PASS", flush=True)
+    print("D: returned state is repaired: PASS", flush=True)
+
+    print("\nE2-S8-S1 BRANCH SEMANTICS: PASS", flush=True)
+    print(
+        "SCOPE: controlled branch-wiring test; "
+        "not yet a real-video or multi-frame validation.",
+        flush=True,
+    )
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception:
+        traceback.print_exc()
+        sys.exit(1)

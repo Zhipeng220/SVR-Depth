@@ -1,0 +1,31 @@
+{
+  "experiment": "Y12-D",
+  "version": "Y12-D-1.0.1",
+  "required_source_experiment": "Y05-R-1.0.1",
+  "required_source_status": "Y05R_COMPLETE_NOT_METHOD_PASS",
+  "parent_policy": "C_star own S8 natural-history snapshots at anchor-1",
+  "anchor_count": 27,
+  "sequences": [
+    "crowd2",
+    "crowd3",
+    "balloon2"
+  ],
+  "K": 32,
+  "schedule": "S8",
+  "horizon": 4,
+  "branches": [
+    "SKIP",
+    "C_STAR",
+    "TEACHER_STATE_COMMIT"
+  ],
+  "teacher_donor": "full current-frame pixel encoder followed by radial same-ray conditioning; donor radius/confidence and all four native feature levels are committed together while rays_base remains fixed",
+  "training": false,
+  "method_pass": false,
+  "Y11_pass": false,
+  "source_note": "Y12-D is a paired recovery-space diagnostic. It reuses the exact Y05-R C_star checkpoint and C_star own-history parent snapshots; it does not train or modify the base model.",
+  "hotfix": {
+    "fix": "Use normalized BCHW tensor from Y05 Engine.load_frame frame['img']; mirror native keyframe autocast and inputs.",
+    "reason": "Y05 Engine.load_frame returns key 'img', not 'image'.",
+    "new_run_required": true
+  }
+}

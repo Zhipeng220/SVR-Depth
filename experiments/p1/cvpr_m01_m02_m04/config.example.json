@@ -1,0 +1,18 @@
+{
+  "protocol": "M01-v1",
+  "test_unsealed": false,
+  "independence_audited": false,
+  "depth_contract_confirmed": false,
+  "k": 16,
+  "gain": 1,
+  "frequency": 1,
+  "alignment": "raw",
+  "model_files": [],
+  "source_files": [],
+  "checkpoints": {
+    "O_fast": [],
+    "O_multi": [],
+    "P": []
+  },
+  "sequences": []
+}

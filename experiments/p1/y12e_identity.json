@@ -1,0 +1,74 @@
+{
+  "experiment": "Y12-E",
+  "version": "Y12-E-1.0.0",
+  "required_source_experiment": "Y05-R-1.0.1",
+  "required_source_status": "Y05R_COMPLETE_NOT_METHOD_PASS",
+  "parent_policy": "C_star own S8 natural-history snapshots at anchor-1",
+  "anchor_count": 27,
+  "sequences": [
+    "crowd2",
+    "crowd3",
+    "balloon2"
+  ],
+  "K": 32,
+  "schedule": "S8",
+  "horizon": 4,
+  "branches": [
+    "E0_CSTAR",
+    "E1_FEATURE_ONLY",
+    "E2_GEOMETRY_ONLY",
+    "E3_FULL_TEACHER"
+  ],
+  "teacher_donor": "full current-frame pixel encoder + input_adapter + pinned RadialModule.forward_keyframe(adapted_features, fixed C_star rays_base); convert persistent BCHW rays to Bx(HW)x3 by permute(0,2,3,1) before flattening; native to_latents/process/depth_proj/confidence_proj; exact Decoder.forward_keyframe geometry transforms; commit geometry and four conditioned feature levels; retain original BCHW rays_base",
+  "training": false,
+  "method_pass": false,
+  "Y11_pass": false,
+  "source_note": "Y12-D is a paired recovery-space diagnostic. It reuses the exact Y05-R C_star checkpoint and C_star own-history parent snapshots; it does not train or modify the base model.",
+  "hotfix": {
+    "fix": "Use pinned native RadialModule.forward_keyframe and exact native keyframe radius/confidence transforms; convert Y05 persistent BCHW rays to Bx(HW)x3 in channel-correct order before conditioning.",
+    "reason": "Y12-D 1.0.2 mixed keyframe-conditioned features with fast propagation readout geometry and passed BCHW persistent rays directly to a flat Bx(HW)x3 embedding, silently scrambling XYZ.",
+    "new_run_required": true
+  },
+  "teacher_decoder_sha256": "35ca12629accd1a2a77595f505165fa17dffab07c763a8b639604285b94bdb08",
+  "teacher_exp1_state_source_sha256": "c24441cb405465c1a16a86127b51aade8f9af69b5d368f43d830d0e759ee3d7f",
+  "teacher_ray_layout": {
+    "persistent_state_layout": "BCHW (B,3,H,W), as returned by pinned exp1.keyframe_state",
+    "radial_keyframe_input_layout": "B(HW)3",
+    "conversion": "rays_base.permute(0,2,3,1).reshape(B,-1,3).contiguous()",
+    "state_commit": "Keep original BCHW rays_base unchanged in the persistent state tuple."
+  },
+  "teacher_readout_contract": {
+    "decoder_source": "velodepth/models/decoder_velo.py",
+    "decoder_sha256": "35ca12629accd1a2a77595f505165fa17dffab07c763a8b639604285b94bdb08",
+    "state_source": "experiments/p1/gt4a2_exp1_train_eval.py",
+    "state_source_sha256": "c24441cb405465c1a16a86127b51aade8f9af69b5d368f43d830d0e759ee3d7f",
+    "radial_method": "RadialModule.forward_keyframe(features, rays_hr)",
+    "internal_path": [
+      "embed_rays",
+      "process",
+      "to_latents",
+      "prompt_camera conditioning",
+      "depth_proj",
+      "confidence_proj"
+    ],
+    "geometry": {
+      "radius": "exp(clamp(logdepth_teacher, -8, 8) + 2)",
+      "confidence": "exp(clamp(logconf_teacher, -8, 10))"
+    },
+    "ray_policy": "Use C_star parent's BCHW rays_base; permute to BHWC and flatten to Bx(HW)x3 for radial keyframe conditioning; preserve BCHW in state tuple.",
+    "scope_limit": "Native radial keyframe readout under fixed rays; not full top-level Decoder.forward_keyframe camera re-estimation or complete keyframe reset."
+  },
+  "purpose": "Controlled state-component attribution on Y05-R C_star own S8 histories.",
+  "h0_policy": "All four arms use exactly the same C_star current-frame prediction; only future committed state differs.",
+  "state_arms": {
+    "E0_CSTAR": "C_star radius, confidence, four persistent feature levels, rays",
+    "E1_FEATURE_ONLY": "C_star radius, confidence, rays; native same-ray Teacher four persistent feature levels",
+    "E2_GEOMETRY_ONLY": "native same-ray Teacher radius; C_star confidence, four persistent feature levels, rays",
+    "E3_FULL_TEACHER": "native same-ray Teacher radius and four persistent feature levels; C_star confidence and rays"
+  },
+  "fixed_components": [
+    "confidence=C_star",
+    "rays=C_star"
+  ],
+  "future_protocol": "H1-H4; no further writeback; identical RGB/flow; K32/S8"
+}

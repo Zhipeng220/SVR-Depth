@@ -1,0 +1,91 @@
+{
+  "version": "1.0.0",
+  "experiment": "N14-A",
+  "method": "Phase-Conditioned Zero-Writeback Micro-Readout",
+  "seed": 20261031,
+  "train_updates": 1000,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0001,
+  "clip_grad_norm": 1.0,
+  "lambda_residual": 0.0001,
+  "checkpoint_interval": 25,
+  "arms": [
+    "N14_A0",
+    "N14_A1"
+  ],
+  "parameter_count": 9244,
+  "feature_channels": 512,
+  "levels": 4,
+  "causal_channels": 3,
+  "phase_encoding": [
+    "h/8",
+    "sin(pi*h/8)"
+  ],
+  "phase_hidden": 8,
+  "phase_activation": "GELU",
+  "phase_A0": "constant [0,0]",
+  "phase_A1": "true S8 local phase; no K32 age channel",
+  "spatial_scalar": "1+0.1*tanh(shared Conv1x1(3,1))",
+  "train_prefix_stop_exclusive": 256,
+  "minimum_GT_per_sequence_phase": 8,
+  "evaluation_K": 32,
+  "evaluation_period": 8,
+  "micro_active_phases": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "baseline_output_frequency": 1,
+  "timing_repeats": 3,
+  "timing_warmup": 32,
+  "old_sequences": [
+    "crowd2",
+    "crowd3",
+    "balloon2"
+  ],
+  "tail_start": {
+    "crowd2": 768,
+    "crowd3": 256,
+    "balloon2": 256
+  },
+  "development_sequences": [
+    "moving_nonobstructing_box",
+    "moving_obstructing_box",
+    "placing_nonobstructing_box",
+    "removing_nonobstructing_box",
+    "person_tracking2"
+  ],
+  "old_RGB_counts": {
+    "crowd2": 895,
+    "crowd3": 854,
+    "balloon2": 469
+  },
+  "loss": "fixed GT-only mask frame AbsRel + 1e-4 * sum(delta_F^2)/clamp(sum(detached F^2),1e-12)",
+  "sample_order": "21 sequence x local-phase strata round-robin; within-stratum deterministic shuffled epochs; same order A0/A1",
+  "cache_dtype": "preserve native dtype, FP16 if original FP16; no silent quantization",
+  "optimization": "native C* state update retained; skip unused native depth projection on micro frames; compute transient readout for current output only",
+  "future_GT": false,
+  "teacher": false,
+  "state_writeback": false,
+  "function_distillation": false,
+  "harm_gate": false,
+  "convex_rollback": false,
+  "auto_download": false,
+  "training_seeds": 1,
+  "final_test": false,
+  "thresholds": {
+    "min_gain_over_Cstar": 0.02,
+    "quality_ratio_to_Omulti": 1.1,
+    "max_latency_ratio_to_Cstar": 1.05,
+    "max_person_severe_excess_over_Ofast": 0.02,
+    "min_phase_gain_A1_over_A0": 0.01,
+    "balloon_severe_must_not_increase": true
+  },
+  "final_selection": "fixed last update only; no validation checkpoint/phase/gain grid",
+  "timing": "warm-file-cache RGB read/decode/preprocess/DIS/state update/micro readout/D2H/sync; no GT, metrics, residual diagnostics or state hashes",
+  "claims": "development screening only; zero writeback is structural isolation, not zero output risk or a stability theorem; N14-B not auto-started"
+}

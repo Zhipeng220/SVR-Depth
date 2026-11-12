@@ -1,0 +1,228 @@
+{
+  "version": "BONN-M01-ONLY-1",
+  "role": "heldout_history_unverified",
+  "test_scores_unseen": false,
+  "calibration_audited": false,
+  "data_provenance_audited": false,
+  "same_head_state_audited": false,
+  "native_replay_rtol": 1e-05,
+  "native_replay_atol": 0.0001,
+  "depth_encoding": "Bonn_registered_uint16_z_div5000",
+  "depth_min_m": null,
+  "depth_max_m": null,
+  "selection_frozen_before_test": false,
+  "selection_budget_equal": false,
+  "candidate_counts": {
+    "A": 3,
+    "O_fast": 3,
+    "O_multi": 3,
+    "P": 3
+  },
+  "matched_training_evidence": "",
+  "selection_evidence": "",
+  "calibration_evidence": "",
+  "independence_evidence": "",
+  "m04_state_audit": "",
+  "snapshot": "/home/svrdepth/hf_cache/hub/models--lpiccinelli--velodepth/snapshots/2b2ee9fe44d0b261e736653042cecd7693f99c8c",
+  "checkpoints": {
+    "P": [
+      {
+        "seed": "20261025",
+        "path": "/home/svrdepth/SVR-Depth/velodepth/outputs/gt4a2_y04_validation_fix3_20261025_225902/training/P_multi/gt4a2_c3_C_final_step1000.pt",
+        "sha256": "77a86cdf523f776608b6b591d6c6552002b90398e85d00d3a3fe29afe14a0a24",
+        "training_record": "/home/svrdepth/SVR-Depth/velodepth/outputs/gt4a2_y04_validation_fix3_20261025_225902/training/P_multi/gt4a2_c3_C_training_summary.json"
+      },
+      {
+        "seed": "20261101",
+        "path": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m05_pmulti_seed_20261101/training/P_multi/gt4a2_c3_C_final_step1000.pt",
+        "sha256": "74e4fcb20db86f0db5f17863538136839136e5ccbb33c6cca63dd0e001f4152a",
+        "training_record": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m05_pmulti_seed_20261101/training/P_multi/gt4a2_c3_C_training_summary.json"
+      },
+      {
+        "seed": "20261102",
+        "path": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m05_pmulti_seed_20261102/training/P_multi/gt4a2_c3_C_final_step1000.pt",
+        "sha256": "9a3cea4496ee99591e911a38669e33c64b31877384bafd7d9d592503a50499f8",
+        "training_record": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m05_pmulti_seed_20261102/training/P_multi/gt4a2_c3_C_training_summary.json"
+      }
+    ],
+    "O_multi": [
+      {
+        "seed": "20261025",
+        "path": "/home/svrdepth/SVR-Depth/velodepth/outputs/gt4a2_y04_validation_fix3_20261025_225902/training/O_multi/Y04_O_multi_final_step1000.pt",
+        "sha256": "558e1850d7b08939bef0db0eb4f7a48fdff8a2fb58417cd4c380ee3c6a6f6948",
+        "training_record": "/home/svrdepth/SVR-Depth/velodepth/outputs/gt4a2_y04_validation_fix3_20261025_225902/training/O_multi/Y04_O_multi_training_summary.json"
+      },
+      {
+        "seed": "20261101",
+        "path": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_omulti_seed_20261101_20261101_222630_11024/training/O_multi/Y04_O_multi_final_step1000.pt",
+        "sha256": "b3643f64f7c39a9a1dc64749dbffe92f98aaeaef6cf316d6b75cb156736f1cb9",
+        "training_record": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_omulti_seed_20261101_20261101_222630_11024/training/O_multi/Y04_O_multi_training_summary.json"
+      },
+      {
+        "seed": "20261102",
+        "path": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_omulti_seed_20261102_20261102_114447_1479/training/O_multi/Y04_O_multi_final_step1000.pt",
+        "sha256": "131bf2b53dffe397b949996463cdb1dbcd30cec4afd53fa01f2f4541239d1efc",
+        "training_record": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_omulti_seed_20261102_20261102_114447_1479/training/O_multi/Y04_O_multi_training_summary.json"
+      }
+    ],
+    "O_fast": [
+      {
+        "seed": "20261025",
+        "path": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_ofast_seed_20261025_20261102_133505_3966/training/O_fast/final.pt",
+        "sha256": "c6b8901217057e31df13ea3d8efbbdfb25a091cc26e46080772bdeb317fd7356",
+        "training_record": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_ofast_seed_20261025_20261102_133505_3966/training/O_fast/summary.json"
+      },
+      {
+        "seed": "20261101",
+        "path": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_ofast_seed_20261101_20261102_133505_3966/training/O_fast/final.pt",
+        "sha256": "5a36a2d5ed37c951b611cefcaa8bcabc132534f1c960128b43fe0e78218323bb",
+        "training_record": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_ofast_seed_20261101_20261102_133505_3966/training/O_fast/summary.json"
+      },
+      {
+        "seed": "20261102",
+        "path": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_ofast_seed_20261102_20261102_133505_3966/training/O_fast/final.pt",
+        "sha256": "c3b9f12937516f5e157ec5cb412f39739eb714122ed1dc62e4e8d4d5d3d4a70a",
+        "training_record": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_ofast_seed_20261102_20261102_133505_3966/training/O_fast/summary.json"
+      }
+    ]
+  },
+  "known_development_manifests": [
+    {
+      "sequence": "crowd2",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/gt4a2_exp1/gt4a2_exp1_crowd2_pairs_used.csv"
+    },
+    {
+      "sequence": "crowd3",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/gt4a2_exp1/gt4a2_exp1_crowd3_pairs_used.csv"
+    },
+    {
+      "sequence": "balloon2",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/gt4a2_exp1/gt4a2_exp1_balloon2_pairs_used.csv"
+    },
+    {
+      "sequence": "moving_nonobstructing_box",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/y11_confirmation_data/manifests/moving_nonobstructing_box.csv"
+    },
+    {
+      "sequence": "moving_obstructing_box",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/y11_confirmation_data/manifests/moving_obstructing_box.csv"
+    },
+    {
+      "sequence": "placing_nonobstructing_box",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/y11_confirmation_data/manifests/placing_nonobstructing_box.csv"
+    },
+    {
+      "sequence": "removing_nonobstructing_box",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/y11_confirmation_data/manifests/removing_nonobstructing_box.csv"
+    },
+    {
+      "sequence": "person_tracking2",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/y11_confirmation_data/manifests/person_tracking2.csv"
+    }
+  ],
+  "sequences": [
+    {
+      "sequence": "balloon_tracking",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_bonn_manifest_v2_20261102_151332_3146/rgbd_bonn_balloon_tracking/pairs.csv",
+      "pairing_audit": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_bonn_manifest_v2_20261102_151332_3146/rgbd_bonn_balloon_tracking/audit.json",
+      "physical_scene_group": "",
+      "physical_scene_verified": false,
+      "recording_session": "",
+      "sensor_model": "",
+      "camera_setup": "",
+      "audit_notes": "候选录像；对8份已知参考清单的RGB字节重叠为零；历史访问未完全确认。",
+      "pretraining_overlap": "unknown"
+    },
+    {
+      "sequence": "kidnapping_box",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_bonn_manifest_v2_20261102_151332_3146/rgbd_bonn_kidnapping_box/pairs.csv",
+      "pairing_audit": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_bonn_manifest_v2_20261102_151332_3146/rgbd_bonn_kidnapping_box/audit.json",
+      "physical_scene_group": "",
+      "physical_scene_verified": false,
+      "recording_session": "",
+      "sensor_model": "",
+      "camera_setup": "",
+      "audit_notes": "候选录像；对8份已知参考清单的RGB字节重叠为零；历史访问未完全确认。",
+      "pretraining_overlap": "unknown"
+    },
+    {
+      "sequence": "placing_obstructing_box",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_bonn_manifest_v2_20261102_151332_3146/rgbd_bonn_placing_obstructing_box/pairs.csv",
+      "pairing_audit": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_bonn_manifest_v2_20261102_151332_3146/rgbd_bonn_placing_obstructing_box/audit.json",
+      "physical_scene_group": "",
+      "physical_scene_verified": false,
+      "recording_session": "",
+      "sensor_model": "",
+      "camera_setup": "",
+      "audit_notes": "候选录像；对8份已知参考清单的RGB字节重叠为零；历史访问未完全确认。",
+      "pretraining_overlap": "unknown"
+    },
+    {
+      "sequence": "removing_obstructing_box",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_bonn_manifest_v2_20261102_151332_3146/rgbd_bonn_removing_obstructing_box/pairs.csv",
+      "pairing_audit": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_bonn_manifest_v2_20261102_151332_3146/rgbd_bonn_removing_obstructing_box/audit.json",
+      "physical_scene_group": "",
+      "physical_scene_verified": false,
+      "recording_session": "",
+      "sensor_model": "",
+      "camera_setup": "",
+      "audit_notes": "候选录像；对8份已知参考清单的RGB字节重叠为零；历史访问未完全确认。",
+      "pretraining_overlap": "unknown"
+    },
+    {
+      "sequence": "synchronous2",
+      "manifest": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_bonn_manifest_v2_20261102_151332_3146/rgbd_bonn_synchronous2/pairs.csv",
+      "pairing_audit": "/home/svrdepth/SVR-Depth/velodepth/outputs/cvpr_m01_bonn_manifest_v2_20261102_151332_3146/rgbd_bonn_synchronous2/audit.json",
+      "physical_scene_group": "",
+      "physical_scene_verified": false,
+      "recording_session": "",
+      "sensor_model": "",
+      "camera_setup": "",
+      "audit_notes": "候选录像；对8份已知参考清单的RGB字节重叠为零；历史访问未完全确认。",
+      "pretraining_overlap": "unknown"
+    }
+  ],
+  "points": [
+    {
+      "id": "A16",
+      "family": "A",
+      "k": 16,
+      "gain": 0,
+      "frequency": 1,
+      "alignment": "raw",
+      "role": "selected",
+      "semantics": "native"
+    },
+    {
+      "id": "O_fast16",
+      "family": "O_fast",
+      "k": 16,
+      "gain": 1,
+      "frequency": 1,
+      "alignment": "raw",
+      "role": "selected",
+      "semantics": "fast output adapter"
+    },
+    {
+      "id": "O_multi16",
+      "family": "O_multi",
+      "k": 16,
+      "gain": 1,
+      "frequency": 1,
+      "alignment": "raw",
+      "role": "selected",
+      "semantics": "multi output adapter"
+    },
+    {
+      "id": "P16",
+      "family": "P",
+      "k": 16,
+      "gain": 1,
+      "frequency": 1,
+      "alignment": "raw",
+      "role": "primary",
+      "semantics": "pre_readout persistent state"
+    }
+  ],
+  "access_history_status": "unknown"
+}

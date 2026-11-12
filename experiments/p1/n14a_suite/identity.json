@@ -1,0 +1,40 @@
+{
+  "source_y05r_protocol_sha256": "f2ac67cbd86cb14536c9a5b9a9414095dc5af0006973503c41e814ea9bf76c7e",
+  "Cstar_tensor_sha256": "f9a7417a2e3fec5e8a96eb6e54534062419d2ab3da364840d8f771da9387feea",
+  "original_source_sha256": {
+    "experiments/p1/y05_common.py": "0b63bdabd3dbd819ec4a24e7c39f8d155be7d35a9a401252d9d27b4e43ecc6b0",
+    "experiments/p1/y05_engine.py": "aec5ff64053687d81def1d360d3afbdbfdffbe86cae140a1b8b00e1999b1b007",
+    "experiments/p1/y05_train.py": "f5c2e25ea16981114d10a21239503ba2fdd062ef111d5ef77bcfcf5e12df37ed",
+    "experiments/p1/y05_eval.py": "bbf72cfbc1e2ffd8a39247081734eb0d60e7b19af71ac2340dc3bc9b06f2cb63",
+    "experiments/p1/gt4a2_y05_future_utility.py": "ffdbdd28a90e6ef5a6fc42c4023ac017ce72426aec3cb620331d4dfa3b9a2a36",
+    "experiments/p1/test_y05.py": "4c032af7cf60e17e19742597e422666827d435713204aa40d46895e44b4b5c8b",
+    "run_y05.sh": "b17ecd14d6e45349d11c9e03b52460e5dc9ab9b65c59e8f5c55fd9e7a4736168",
+    "experiments/p1/gt4a2_y04a_native_pre_readout_eval.py": "6fbe1a2464a7f9756f9ea68cf05f3476a89b005b8e6f889dd1a0093f231c3116",
+    "experiments/p1/y08y09_models.py": "3b5e24786ab61c20c5b780e01cef2006a1a7868fa88b071ea63588d696d0e5b8",
+    "experiments/p1/y08y09_common.py": "17756ccfee812a2c973be6d7c4905a1d71e42a434f39c25632c0dad76f91ccf3",
+    "experiments/p1/gt4a2_exp1_train_eval.py": "c24441cb405465c1a16a86127b51aade8f9af69b5d368f43d830d0e759ee3d7f",
+    "experiments/p1/gt2_fixed_clip_repair_train.py": "bf7cd2021b1d0bbf66d75502dba6afed87f4c8ff3ef58ff7b18f56ac28044192",
+    "velodepth/models/decoder_velo.py": "35ca12629accd1a2a77595f505165fa17dffab07c763a8b639604285b94bdb08",
+    "velodepth/models/persistent_feature_repair.py": "6dfc8b0c5565ea9139b8c266c5ef337b3309ce0fde2f365428fc44390b84117c",
+    "velodepth/models/velodepth.py": "739c5f27a749174987b9a36edaac32fb98070e87dbef0a0a52f7430d61149479",
+    "velodepth/models/encoder_velo.py": "3c5aa2a3a6dce03b68373953037fe8a0313a2cab36d66e5e3b88a56ec4a7ba8a",
+    "experiments/p1/gt4a2_y05r.py": "f172dedd56d20420e1ddc797c79d7109d661df7a8c75a230c8b4ca6d43455444",
+    "experiments/p1/y05r_common.py": "c3c29639a9da3d0d466e4cef648794b1791559f117aaa68bcb4b45711c9fc547",
+    "experiments/p1/y05r_train.py": "7d96a710578c2ffa9eacba415dd1d29527459bb286a9ccca3c00125d3621c61a",
+    "experiments/p1/y05r_eval.py": "ded3b554e0af41591c7edf2ba9aac1015acb29a22099943a62b70e046675223d",
+    "experiments/p1/test_y05r.py": "df9334d13a18d20859d110ea380fbafc5c68e22e9fdf7857d446230ee2e0f9ea",
+    "experiments/p1/y05r_identity.json": "3515ed61d662e25245af85fba2a12521cd5da38f7eeeb2e69fe876e022c1e1ee",
+    "experiments/p1/y05r_SHA256SUMS": "5ec5d9defc29c279e1efa6ff3087776645b3d1b90708354902b1eaf632a35508",
+    "run_y05r.sh": "aab37631b450f1d6831784ff8e512b0500c6ed15233379facd2d042215d6334c"
+  },
+  "decoder_sha256": "35ca12629accd1a2a77595f505165fa17dffab07c763a8b639604285b94bdb08",
+  "repair_head_sha256": "6dfc8b0c5565ea9139b8c266c5ef337b3309ce0fde2f365428fc44390b84117c",
+  "base_weight_sha256": "615335cd006663cd567e0a1c74bef7ed622ea733dbff016844ab64e3da22ce3e",
+  "reviewed_N13_protocol_sha256": "7049a29c522834157d531cf7e3b2a0ad0328a056632b22c2e3ec24443dba8c14",
+  "Cstar_file_sha256": "7f335a4111e5426f61e3a1ffa7203e9102b779d08971513d769df12e2025bc71",
+  "reviewed_manifest_sha256": {
+    "crowd2": "f7bf9226edcedf6c05d63938e29f92bf9364878c9291dbd79172c973c296f350",
+    "crowd3": "9f4da8360b8f6b3039330dc7fe9dba6dd7219d9427e774b89006b09269fa17ad",
+    "balloon2": "afbd46ebed192aaf69f580822993fb7c756c5656de0595f68143993859918b06"
+  }
+}

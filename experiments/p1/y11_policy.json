@@ -1,0 +1,61 @@
+{
+  "version": "Y11-Fallback-1.0.1",
+  "stage": "Y11-A fixed-checkpoint candidate confirmation",
+  "candidate": "reviewed P_multi",
+  "K": 16,
+  "gain": 1.0,
+  "frequency": 1,
+  "calibration": "raw only; no fit",
+  "methods": [
+    "A",
+    "O_fast",
+    "O_multi",
+    "P"
+  ],
+  "new_training": false,
+  "training_seed_count": 1,
+  "timing_repeats": 3,
+  "timing_warmup_RGB": 64,
+  "bootstrap_repeats": 2000,
+  "bootstrap_seed": 20261030,
+  "known_development_sequences": [
+    "crowd2",
+    "crowd3",
+    "balloon2",
+    "person_tracking",
+    "synchronous"
+  ],
+  "confirmation_sequences": [
+    "moving_nonobstructing_box",
+    "moving_obstructing_box",
+    "placing_nonobstructing_box",
+    "removing_nonobstructing_box",
+    "person_tracking2"
+  ],
+  "sealed_future_sequences": [
+    "balloon_tracking",
+    "kidnapping_box",
+    "placing_obstructing_box",
+    "removing_obstructing_box",
+    "synchronous2"
+  ],
+  "data_source": "https://www.ipb.uni-bonn.de/data/rgbd-dynamic-dataset/index.html",
+  "data_url_base": "https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/",
+  "depth_scale": 5000.0,
+  "max_timestamp_delta_ms": 20.0,
+  "independence_scope": "new Bonn recordings screened against prior local outputs; different physical scenes and base pretraining independence NOT established",
+  "final_blind_test": false,
+  "thresholds_are_new_prospective_engineering_criteria_not_retroactive_Y09_PASS": true,
+  "confirmation_rules": {
+    "minimum_videos": 5,
+    "P_macro_AbsRel_ratio_to_O_fast_max": 0.98,
+    "P_macro_latency_ratio_to_O_fast_max": 1.05,
+    "P_macro_AbsRel_ratio_to_O_multi_max": 1.1,
+    "P_macro_latency_ratio_to_O_multi_max": 0.95,
+    "P_worst_video_relative_AbsRel_increase_vs_A_max": 0.1,
+    "P_per_video_severe_fraction_minus_O_fast_max": 0.02,
+    "severe_frame_absolute_AbsRel_increase_vs_A": 0.01
+  },
+  "completion_is_not_full_Y11_PASS": "one frozen training seed; independent physical-scene and final-test stages remain separate",
+  "missing_indexed_depth": "Retain original full-index association; only a CRC-verified ZIP with matching raw indices may prove an indexed GT file absent. Mark MISSING_DEPTH_FILE, never drop RGB or reassign to a nearby available GT."
+}

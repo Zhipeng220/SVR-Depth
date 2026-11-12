@@ -1,0 +1,47 @@
+{
+  "protocol_id": "Y04-V4-Bonn-InDomain-1.0",
+  "experiment_purpose": "bonn_in_domain_head_training",
+  "split_type": "sequence_disjoint_same_environment",
+  "physical_scene_independence": false,
+  "shared_environment_declared": true,
+  "bonn_dataset_zero_shot": false,
+  "historical_y11_dev_exposure_acknowledged": true,
+  "checkpoint_selection": "final_update_only",
+  "train_sequences": [
+    "crowd2",
+    "crowd3",
+    "balloon2",
+    "person_tracking",
+    "synchronous",
+    "balloon_tracking",
+    "kidnapping_box",
+    "moving_nonobstructing_box2",
+    "moving_obstructing_box2",
+    "placing_nonobstructing_box2",
+    "placing_obstructing_box",
+    "removing_nonobstructing_box2",
+    "removing_obstructing_box"
+  ],
+  "dev_sequences": [
+    "moving_obstructing_box",
+    "person_tracking2",
+    "removing_nonobstructing_box",
+    "moving_nonobstructing_box",
+    "placing_nonobstructing_box"
+  ],
+  "external_evaluation_datasets": [
+    "TUM-RGBD",
+    "ScanNet",
+    "Sintel"
+  ],
+  "evidence": {
+    "path": "Y04_V4_Bonn18_物理场景审计报告_20261108.md",
+    "sha256": "731c613db1c2fd91bc8f6411754639a45622d19f1a9f86a74a1872c91263d565"
+  },
+  "prohibited_claims": [
+    "Bonn dataset-level zero shot",
+    "Physically independent train/dev split",
+    "E4-C equivalence"
+  ],
+  "notes": "The 13/5 split is same-laboratory sequence-held-out development. Any Bonn evaluation must disclose training/development overlap. Other datasets are only external with head not trained or selected on them, conditional on pretraining provenance."
+}

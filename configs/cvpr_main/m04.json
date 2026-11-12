@@ -1,0 +1,11 @@
+{
+  "experiment": "M04",
+  "test_unsealed": false,
+  "selection_before_test": false,
+  "m00_state_and_depth_audit_complete": false,
+  "same_head_identity_and_state_semantics_audited": false,
+  "k": 16,
+  "gain": 1,
+  "frequency": 1,
+  "alignment": "raw"
+}

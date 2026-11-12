@@ -1,0 +1,40 @@
+**/__pycache__/
+**/build/
+**/dist/
+**/*egg-info
+.gradio/
+
+# ignore scripts
+_*.sh
+__*.png
+__*.jpg
+__*.webp
+___*.py
+**/___*.py
+
+# ignore pcds
+*.ply
+
+# ignore data
+/data
+
+# Local artifacts and data
+/outputs/
+/datasets/
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+.env
+.env.*
+.venv/
+.idea/
+.ipynb_checkpoints/
+
+# Exclude generated archives, data tables, and backups
+*.zip
+*.csv
+*.bak
+*.log

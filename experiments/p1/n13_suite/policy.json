@@ -1,0 +1,68 @@
+{
+  "version": "2.0.0",
+  "experiment": "N13",
+  "method": "FPRT",
+  "seed": 20261030,
+  "train_updates": 1000,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0001,
+  "clip_grad_norm": 1.0,
+  "train_K": 32,
+  "train_period": 8,
+  "horizon": 1,
+  "train_prefix_stop_exclusive": 256,
+  "feature_channels": 512,
+  "hidden": 32,
+  "levels": 4,
+  "causal_channels": 4,
+  "lambda_future": 1.0,
+  "lambda_function": 1.0,
+  "lambda_residual": 0.0001,
+  "lambda_gate": 0.0,
+  "lambda_harm": 0.0,
+  "gate_tau": 0.0,
+  "envelope_eta": 1.0,
+  "envelope_block": 8,
+  "arms": [
+    "N13_A",
+    "N13_B"
+  ],
+  "final_selection": "fixed last update, no checkpoint/threshold/sequence search",
+  "parent_history": "frozen C_star K32/S8; prefix only; common off-policy bank for both arms",
+  "evaluation_K": 32,
+  "evaluation_period": 8,
+  "timing_repeats": 3,
+  "timing_warmup": 32,
+  "baseline_output_frequency": 1,
+  "checkpoint_interval": 25,
+  "old_sequences": [
+    "crowd2",
+    "crowd3",
+    "balloon2"
+  ],
+  "tail_start": {
+    "crowd2": 768,
+    "crowd3": 256,
+    "balloon2": 256
+  },
+  "development_sequences": [
+    "moving_nonobstructing_box",
+    "moving_obstructing_box",
+    "placing_nonobstructing_box",
+    "removing_nonobstructing_box",
+    "person_tracking2"
+  ],
+  "auto_download": false,
+  "training_seeds": 1,
+  "final_test": false,
+  "full_method_pass": false,
+  "attribution": "A and B have identical parameter count, H1 targets, loss weights, order and updates; A ties read/transport via their average, B separates them. Both use functional loss to isolate factorization.",
+  "thresholds": {
+    "min_gain_over_Cstar": 0.02,
+    "quality_ratio_to_Omulti": 1.1,
+    "max_latency_ratio_to_Cstar": 1.05,
+    "max_person_severe_excess_over_Ofast": 0.02,
+    "balloon_severe_must_not_increase": true
+  },
+  "compute_claim": "equal updates and target frame exposure, recorded CUDA/wall costs; NOT equal FLOPs or compute"
+}

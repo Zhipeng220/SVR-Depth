@@ -1,0 +1,21 @@
+{
+  "description": "仅为格式示例；必须根据真实训练日志填满三个 seed，并提供可核验的独立训练记录。",
+  "pairs": [
+    {
+      "seed": "填写真实外层种子",
+      "P_checkpoint_sha256": "填写64位SHA256",
+      "O_multi_checkpoint_sha256": "填写64位SHA256",
+      "P_initial_head_sha256": "填写64位SHA256",
+      "O_multi_initial_head_sha256": "填写相同初始头SHA256",
+      "P_sample_order_sha256": "填写64位SHA256",
+      "O_multi_sample_order_sha256": "填写相同的样本顺序SHA256",
+      "P_supervision_sha256": "填写监督帧与GT清单的64位SHA256",
+      "O_multi_supervision_sha256": "填写相同监督帧与GT清单SHA256",
+      "P_steps": 1000,
+      "O_multi_steps": 1000,
+      "P_gt_exposures": 0,
+      "O_multi_gt_exposures": 0,
+      "checkpoint_rule": "fixed_final_step"
+    }
+  ]
+}
