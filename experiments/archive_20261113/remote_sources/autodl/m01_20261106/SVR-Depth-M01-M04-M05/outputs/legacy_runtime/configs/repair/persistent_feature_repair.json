@@ -1,0 +1,9 @@
+{
+  "model": {
+    "persistent_feature_repair": {
+      "enabled": true,
+      "mode": "pre_readout",
+      "bottleneck": 32
+    }
+  }
+}

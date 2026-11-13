@@ -1,0 +1,733 @@
+diff --git a/svr_depth/evaluation/m01_v31/README.md b/svr_depth/evaluation/m01_v31/README.md
+new file mode 100644
+--- /dev/null
++++ b/svr_depth/evaluation/m01_v31/README.md
+@@ -0,0 +1,121 @@
++# M01 V3.1: isolated offline evaluation prototype
++
++This directory is independent of the model, training, M04/M05, frozen
++P_multi, Y11 and D13 code or results. It does not perform inference, create a
++dataset manifest, or schedule a benchmark. `tau5`/`tau5_ssi` are **provisional
++diagnostics**, not a claim of numerical equivalence to the VeloDepth paper.
++The published per-pixel accuracy `tau` in the examined evaluator is at 3%; it
++is not the paper's temporal τ5. The M01 V3.1 protocol and VeloDepth paper §4.1
++require a temporal comparison, not a 5% threshold on prediction versus GT.
++
++## Deliberately explicit contract
++
++`evaluate_pair` requires matching H×W image grids for both z-depths, GTs,
++their GT masks, intrinsics and flows. All depths are metres. The origin of each
++pixel centre is its integer `(x, y)` coordinate. Intrinsics use that same
++coordinate system. `flow_bwd_px[y,x]` is current → previous displacement in
++**pixels** on the current grid; `flow_fwd_px` is previous → current on the
++previous grid. The corresponding Boolean masks belong to those grids. Finite
++coordinates must be inside `[0,W-1] × [0,H-1]` and every source pixel with a
++nonzero bilinear weight must be valid. At current pixel `x`, the code checks
++`||bwd(x) + fwd(x+bwd(x))|| < fb_max_error_px`. The threshold is a **required
++caller choice**, not a claim about the authors' unpublished evaluation. Both
++GT masks and the flow masks must be defined independently of the method being
++evaluated. Masks, flow source, threshold and failed pairs must be recorded for
++all methods and frozen before a formal comparison.
++
++Given a verified camera-to-world pose for each frame, previous z-depth is
++bilinearly sampled at the backward correspondence, unprojected with the
++previous-frame pinhole K, and transformed into the current camera by
++`inv(curr_c2w) @ prev_c2w`. The provisional τ5 inlier is
++`abs(z_prev_in_curr - z_curr) / z_curr < 0.05`. This is one explicit
++interpretation of paper §4.1, not the authors' confirmed implementation:
++their precise occlusion rule, aggregation, pose/ego-motion method, flow
++preprocessing, and alignment details remain to be established. Moving objects
++or erroneous flow may violate the static-point pose transformation; consistent
++flow alone does not establish static-scene visibility. Only use independently
++verified pose and masks. An identity matrix can be a true pose or a loader
++placeholder; **verification flags must come from original source metadata**.
++Missing/unverified pose yields `missing_or_unverified_pose`, never an identity
++fallback. No common pixels yields `no_valid_pixels`, not zero or NaN.
++
++SSI is a per-frame, GT-dependent *offline scoring* operation, never a model
++input or state update. `_ssi` approximates the inspected upstream single-frame
++fit: choose pixels whose absolute raw GT/pred error is strictly below its 95th
++percentile, and solve `s*pred+b≈GT` with `1e-4 I` regularization. NumPy's solve
++and guard behavior are not guaranteed bitwise equivalent to upstream PyTorch.
++If strict trimming leaves fewer than two pixels, or the aligned prediction is
++non-positive on the GT mask, SSI is reported unavailable; no per-method GT
++mask is silently reduced. An invalid raw prediction on the GT mask raises an
++error, to be counted as a failure by the caller. Raw `delta1` uses the standard
++strict ratio `<1.25`. Both temporal variants return a pixel count, inlier count,
++status and optional value for each pair. Aggregation across frames, sequences,
++scenes and datasets is **not implemented**.
++
++## Flow units and resizing
++
++DIS and SEA-RAFT calls in the inspected source produce pixel displacements;
++the model later divides by `(W-1,H-1)` for its own grid function. Dataset
++`decode_flow` produces encoded values in approximately `[-1,1]`; its mapping
++to physical pixels must be checked against the actual dataset preprocessing
++and metadata before use. Do not infer units merely from value ranges. The
++helper `fraction_of_extent_to_pixels` is only for a documented displacement
++divided by `(W-1,H-1)`; it is **not** a normalized absolute `grid_sample` grid.
++`resize_flow_pixels` implements the common half-pixel convention with both
++images resized equally and scales x/y displacement by the width/height ratios.
++`crop_flow_pixels` handles potentially different target/source crop origins.
++`transform_intrinsics` performs the same resize followed by crop. They do not
++automatically transform masks or establish which preprocessing the data used;
++apply the corresponding transformations and regenerate valid/occlusion masks
++for the actual pipeline. Differing resize transforms for the two frames need an
++explicit coordinate-map adapter and are not supported by these helpers.
++
++## CPU tests
++
++From the SVR-Depth-CVPR root, using its Python with NumPy installed:
++
++```bash
++python -m unittest discover -s svr_depth/evaluation/m01_v31 -p 'test_*.py' -v
++```
++
++Tests use synthetic arrays only. They do not prove source-data calibration,
++official compatibility, checkpoint identity or dataset correctness.
++
++## Offline pair CLI
++
++The NPZ must contain numeric `prev_pred`, `curr_pred`, `prev_gt`, `curr_gt`,
++`K_prev`, `K_curr`, `flow_bwd_px`, `flow_fwd_px`; Boolean `prev_gt_mask`,
++`curr_gt_mask`, `flow_bwd_valid`, `flow_fwd_valid`; and, when available,
++`prev_c2w`, `curr_c2w`. No pickle or object arrays are read. Use the pose flags
++only after verifying the original metadata; without them the temporal score is
++unavailable. Example, for a separately prepared *development* pair:
++
++```bash
++python -m svr_depth.evaluation.m01_v31.evaluate_npz \
++  --input /absolute/path/to/development_pair.npz --pair-id example \
++  --flow-source 'documented flow source' --pose-source 'verified pose source' \
++  --fb-max-error-px 0.25 --prev-pose-verified --curr-pose-verified
++```
++
++`0.25` is only an example, not a paper threshold. JSON is printed to stdout;
++no existing results are overwritten. The caller must retain a failure row if
++loading, prediction validation or SSI fails and must not change the common
++mask per method.
++
++## Official `--dataroot` guard
++
++The sibling upstream repository's `scripts/eval.py` requires `--dataroot` but
++the audited code reads `os.environ['DATAROOT']` in `BaseDataset`. This separate
++launcher rejects disagreements, sets the environment to the resolved CLI
++directory and then launches the explicitly supplied upstream script. It does
++not modify the upstream repository. The CVPR project's own `scripts/eval.py`
++dispatches M04/M05 and is **not** that script. Inspect the launcher with:
++
++```bash
++python -m svr_depth.evaluation.m01_v31.official_eval_entry --help
++```
++
++When an upstream smoke is separately authorized after protocol preparation,
++invoke the launcher with `--official-repo /root/autodl-tmp/SVR-Depth/velodepth`
++and an existing `--dataroot`; remaining options are passed to the upstream
++script. No smoke, training or four-dataset evaluation is run by the tests.
+diff --git a/svr_depth/evaluation/m01_v31/__init__.py b/svr_depth/evaluation/m01_v31/__init__.py
+new file mode 100644
+--- /dev/null
++++ b/svr_depth/evaluation/m01_v31/__init__.py
+@@ -0,0 +1 @@
++"""Independent, provisional M01 evaluation utilities; no model changes."""
+diff --git a/svr_depth/evaluation/m01_v31/evaluate_npz.py b/svr_depth/evaluation/m01_v31/evaluate_npz.py
+new file mode 100644
+--- /dev/null
++++ b/svr_depth/evaluation/m01_v31/evaluate_npz.py
+@@ -0,0 +1,40 @@
++"""Run the provisional offline pair diagnostic on explicitly prepared NPZ arrays."""
++import argparse
++import json
++from pathlib import Path
++
++import numpy as np
++
++try:
++    from .metrics import evaluate_pair
++except ImportError:
++    from metrics import evaluate_pair
++
++
++def main(argv=None):
++    p = argparse.ArgumentParser(description=__doc__)
++    p.add_argument("--input", required=True, help="NPZ with arrays specified in README")
++    p.add_argument("--pair-id", required=True)
++    p.add_argument("--flow-source", required=True)
++    p.add_argument("--pose-source", required=True)
++    p.add_argument("--fb-max-error-px", type=float, required=True)
++    p.add_argument("--prev-pose-verified", action="store_true")
++    p.add_argument("--curr-pose-verified", action="store_true")
++    args = p.parse_args(argv)
++    with np.load(Path(args.input), allow_pickle=False) as data:
++        names = ("prev_pred", "curr_pred", "prev_gt", "curr_gt", "prev_gt_mask", "curr_gt_mask",
++                 "K_prev", "K_curr", "flow_bwd_px", "flow_fwd_px", "flow_bwd_valid", "flow_fwd_valid")
++        values = {name: data[name] for name in names}
++        values["prev_c2w"] = data["prev_c2w"] if "prev_c2w" in data else None
++        values["curr_c2w"] = data["curr_c2w"] if "curr_c2w" in data else None
++    result = evaluate_pair(**values, prev_pose_valid=args.prev_pose_verified,
++                           curr_pose_valid=args.curr_pose_verified,
++                           fb_max_error_px=args.fb_max_error_px)
++    print(json.dumps({"status": "PROVISIONAL_NOT_PAPER_VERIFIED", "pair_id": args.pair_id,
++                      "flow_source": args.flow_source, "pose_source": args.pose_source,
++                      "fb_max_error_px": args.fb_max_error_px, "scores": result},
++                     indent=2, allow_nan=False))
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/svr_depth/evaluation/m01_v31/metrics.py b/svr_depth/evaluation/m01_v31/metrics.py
+new file mode 100644
+--- /dev/null
++++ b/svr_depth/evaluation/m01_v31/metrics.py
+@@ -0,0 +1,275 @@
++"""Provisional M01 pair evaluator; see README before interpreting its output.
++
++Arrays are NumPy HxW depths/masks and HxWx2 flows in pixel units. Pixel
++centres have integer coordinates. A backward flow is on the current frame and
++points to the previous frame; forward flow is on the previous frame.
++"""
++from dataclasses import asdict, dataclass
++import math
++
++import numpy as np
++
++
++@dataclass(frozen=True)
++class Score:
++    status: str
++    valid_pixels: int = 0
++    inliers: int = 0
++    value: float | None = None
++    detail: str = ""
++
++
++def _array(x, shape, name, dtype=np.float64):
++    a = np.asarray(x, dtype=dtype)
++    if a.shape != shape:
++        raise ValueError(f"{name} must have shape {shape}, got {a.shape}")
++    return a
++
++
++def _mask(x, shape, name):
++    a = np.asarray(x)
++    if a.shape != shape or a.dtype != np.bool_:
++        raise ValueError(f"{name} must be a boolean array of shape {shape}")
++    return a
++
++
++def pixel_grid(height, width):
++    if height < 1 or width < 1:
++        raise ValueError("image dimensions must be positive")
++    y, x = np.mgrid[:height, :width]
++    return np.stack((x, y), axis=-1).astype(np.float64)
++
++
++def bilinear_sample(image, xy):
++    """Pull sample and return a full-support validity mask, including bounds.
++
++    At fractional locations every nonzero-weight input pixel must be finite;
++    coordinates outside the pixel-centre rectangle are invalid, never padded.
++    """
++    a = np.asarray(image, dtype=np.float64)
++    coords = np.asarray(xy, dtype=np.float64)
++    if a.ndim not in (2, 3) or coords.ndim != 3 or coords.shape[-1] != 2:
++        raise ValueError("image must be HxW[xC] and coordinates HxWx2")
++    h, w = a.shape[:2]
++    if h < 1 or w < 1:
++        raise ValueError("empty source image")
++    finite_xy = np.isfinite(coords).all(axis=-1)
++    inside = (finite_xy & (coords[..., 0] >= 0) & (coords[..., 0] <= w - 1)
++              & (coords[..., 1] >= 0) & (coords[..., 1] <= h - 1))
++    # Clamping here is only to make indexing safe. It does not make OOB valid.
++    x = np.clip(np.where(finite_xy, coords[..., 0], 0), 0, w - 1)
++    y = np.clip(np.where(finite_xy, coords[..., 1], 0), 0, h - 1)
++    x0, y0 = np.floor(x).astype(np.intp), np.floor(y).astype(np.intp)
++    x1, y1 = np.minimum(x0 + 1, w - 1), np.minimum(y0 + 1, h - 1)
++    dx, dy = x - x0, y - y0
++    weights = ((1-dx)*(1-dy), dx*(1-dy), (1-dx)*dy, dx*dy)
++    corners = (a[y0, x0], a[y0, x1], a[y1, x0], a[y1, x1])
++    result = np.zeros(coords.shape[:2] + a.shape[2:], dtype=np.float64)
++    good = inside.copy()
++    for weight, corner in zip(weights, corners):
++        finite = np.isfinite(corner)
++        if a.ndim == 3:
++            good &= (weight == 0) | finite.all(axis=-1)
++            result += weight[..., None] * np.where(finite, corner, 0)
++        else:
++            good &= (weight == 0) | finite
++            result += weight * np.where(finite, corner, 0)
++    return result, good
++
++
++def _sample_mask(mask, xy):
++    # Do not accept a bilinear mixture containing an invalid source pixel.
++    _, valid = bilinear_sample(np.where(mask, 1.0, np.nan), xy)
++    return valid
++
++
++def backward_correspondence(flow_bwd_px, flow_fwd_px, valid_bwd, valid_fwd,
++                            fb_max_error_px):
++    """Current -> previous mapping and current-grid forward/backward mask."""
++    bwd = np.asarray(flow_bwd_px, dtype=np.float64)
++    if bwd.ndim != 3 or bwd.shape[-1] != 2:
++        raise ValueError("backward flow must be HxWx2")
++    shape = bwd.shape[:2]
++    fwd = _array(flow_fwd_px, bwd.shape, "forward flow")
++    vb = _mask(valid_bwd, shape, "backward flow validity")
++    vf = _mask(valid_fwd, shape, "forward flow validity")
++    if not math.isfinite(fb_max_error_px) or fb_max_error_px <= 0:
++        raise ValueError("fb_max_error_px must be finite and > 0")
++    coords = pixel_grid(*shape) + bwd
++    fwd_warped, in_bounds = bilinear_sample(fwd, coords)
++    residual = np.linalg.norm(np.where(np.isfinite(bwd), bwd, 0) + fwd_warped, axis=-1)
++    valid = (vb & np.isfinite(bwd).all(axis=-1) & in_bounds
++             & _sample_mask(vf, coords) & (residual < fb_max_error_px))
++    return coords, valid
++
++
++def resize_flow_pixels(flow_px, out_shape):
++    """Resize a pixel displacement field using half-pixel centres, border mode.
++
++    Both frames must undergo the same resize. Components are multiplied by
++    new_width/old_width and new_height/old_height respectively.
++    """
++    flow = np.asarray(flow_px, dtype=np.float64)
++    if flow.ndim != 3 or flow.shape[-1] != 2 or not np.isfinite(flow).all():
++        raise ValueError("flow must be finite HxWx2")
++    oh, ow = flow.shape[:2]
++    nh, nw = out_shape
++    if min(oh, ow, nh, nw) < 1:
++        raise ValueError("image dimensions must be positive")
++    sx, sy = nw / ow, nh / oh
++    xy = pixel_grid(nh, nw)
++    xy[..., 0] = np.clip((xy[..., 0] + 0.5) / sx - 0.5, 0, ow - 1)
++    xy[..., 1] = np.clip((xy[..., 1] + 0.5) / sy - 0.5, 0, oh - 1)
++    result, _ = bilinear_sample(flow, xy)
++    return result * np.array([sx, sy])
++
++
++def crop_flow_pixels(flow_px, target_top_left, source_top_left, out_shape):
++    """Crop target-domain flow and account for possibly different crop origins."""
++    flow = np.asarray(flow_px, dtype=np.float64)
++    if flow.ndim != 3 or flow.shape[-1] != 2:
++        raise ValueError("flow must be HxWx2")
++    ty, tx = target_top_left
++    sy, sx = source_top_left
++    h, w = out_shape
++    if min(ty, tx, sy, sx) < 0 or h < 1 or w < 1 or ty+h > flow.shape[0] or tx+w > flow.shape[1]:
++        raise ValueError("invalid crop")
++    return flow[ty:ty+h, tx:tx+w].copy() + np.array([tx-sx, ty-sy])
++
++
++def transform_intrinsics(K, scale_xy, crop_top_left=(0, 0)):
++    """Apply half-pixel resize followed by crop to a pinhole intrinsic matrix."""
++    k = _intrinsics(K, "intrinsics")
++    sx, sy = scale_xy
++    top, left = crop_top_left
++    if not (math.isfinite(sx) and math.isfinite(sy) and sx > 0 and sy > 0):
++        raise ValueError("resize scales must be positive and finite")
++    affine = np.array([[sx, 0, (sx-1)/2-left], [0, sy, (sy-1)/2-top], [0, 0, 1]])
++    return affine @ k
++
++
++def fraction_of_extent_to_pixels(flow, shape):
++    """Convert displacement divided by (W-1,H-1), not a grid in [-1,1]."""
++    h, w = shape
++    if h < 2 or w < 2:
++        raise ValueError("extent-normalized flow needs height and width >= 2")
++    return _array(flow, (h, w, 2), "normalized flow") * [w-1, h-1]
++
++
++def _intrinsics(K, name):
++    k = _array(K, (3, 3), name)
++    if (not np.isfinite(k).all() or not np.allclose(k[2], [0, 0, 1], atol=1e-8)
++            or k[0, 0] <= 0 or k[1, 1] <= 0 or abs(np.linalg.det(k)) < 1e-12):
++        raise ValueError(f"{name} must be a finite, invertible pinhole K")
++    return k
++
++
++def _pose(c2w, valid, name):
++    if valid is not True or c2w is None:
++        return None
++    p = _array(c2w, (4, 4), name)
++    r = p[:3, :3]
++    if (not np.isfinite(p).all() or not np.allclose(p[3], [0, 0, 0, 1], atol=1e-6)
++            or not np.allclose(r.T @ r, np.eye(3), atol=1e-4)
++            or not np.isclose(np.linalg.det(r), 1, atol=1e-4)):
++        raise ValueError(f"{name} is not a finite rigid camera-to-world transform")
++    return p
++
++
++def _score(inliers, valid, empty_status="no_valid_pixels"):
++    n = int(valid.sum())
++    if not n:
++        return Score(empty_status)
++    k = int((inliers & valid).sum())
++    return Score("ok", n, k, k / n)
++
++
++def _ssi(gt, pred, mask):
++    """Approximate published code's per-frame 95% trimmed fit, with guards."""
++    g, p = gt[mask].astype(np.float32), pred[mask].astype(np.float32)
++    if not len(g):
++        return None, "no GT pixels"
++    error = np.abs(g-p)
++    selected = error < np.float32(np.quantile(error, 0.95))
++    if selected.sum() < 2:
++        return None, "SSI strict 95% trim leaves fewer than two pixels"
++    x = np.stack((p[selected], np.ones(selected.sum(), dtype=np.float32)), axis=1)
++    a = x.T @ x + np.float32(1e-4) * np.eye(2, dtype=np.float32)
++    try:
++        scale, shift = np.linalg.solve(a, x.T @ g[selected])
++    except np.linalg.LinAlgError:
++        return None, "SSI fit is singular"
++    aligned = pred * float(scale) + float(shift)
++    if not np.isfinite(aligned[mask]).all() or np.any(aligned[mask] <= 0):
++        return None, "SSI produces non-positive or non-finite depth"
++    return aligned, ""
++
++
++def _frame(gt, pred, mask):
++    if not mask.any():
++        return {"delta1": Score("no_gt_pixels"), "delta1_ssi": Score("no_gt_pixels")}, None
++    if not np.isfinite(gt[mask]).all() or np.any(gt[mask] <= 0):
++        raise ValueError("GT mask includes invalid or non-positive GT")
++    if not np.isfinite(pred[mask]).all() or np.any(pred[mask] <= 0):
++        raise ValueError("prediction invalid on GT mask; do not silently remove pixels")
++    ratio = np.maximum(gt[mask] / pred[mask], pred[mask] / gt[mask])
++    n = int(mask.sum())
++    k = int((ratio < 1.25).sum())
++    delta = Score("ok", n, k, k/n)
++    aligned, detail = _ssi(gt, pred, mask)
++    if aligned is None:
++        return {"delta1": delta, "delta1_ssi": Score("ssi_unavailable", detail=detail)}, None
++    ratio_ssi = np.maximum(gt[mask] / aligned[mask], aligned[mask] / gt[mask])
++    k = int((ratio_ssi < 1.25).sum())
++    return {"delta1": delta, "delta1_ssi": Score("ok", n, k, k/n)}, aligned
++
++
++def _temporal(prev, curr, previous_xy, valid, K_prev, prev_to_curr):
++    h, w = prev.shape
++    sampled_prev, finite = bilinear_sample(prev, previous_xy)
++    # Pixels excluded by the common mask cannot poison the calculation.
++    sample = np.where(valid & finite, sampled_prev, 0)
++    xy = np.where(np.isfinite(previous_xy), previous_xy, 0)
++    rays = np.concatenate((xy, np.ones((h, w, 1))), axis=-1) @ np.linalg.inv(K_prev).T
++    points = rays * (sample / rays[..., 2])[..., None]
++    transformed_z = (points @ prev_to_curr[:3, :3].T + prev_to_curr[:3, 3])[..., 2]
++    if not finite[valid].all() or not np.isfinite(transformed_z[valid]).all() or np.any(transformed_z[valid] <= 0):
++        return Score("invalid_prediction", int(valid.sum()), detail="invalid transformed depth on common mask")
++    error = np.zeros_like(curr)
++    error[valid] = np.abs(transformed_z[valid] - curr[valid]) / curr[valid]
++    return _score(error < 0.05, valid)
++
++
++def evaluate_pair(*, prev_pred, curr_pred, prev_gt, curr_gt, prev_gt_mask,
++                  curr_gt_mask, K_prev, K_curr, prev_c2w, curr_c2w,
++                  prev_pose_valid, curr_pose_valid, flow_bwd_px, flow_fwd_px,
++                  flow_bwd_valid, flow_fwd_valid, fb_max_error_px):
++    """Score a pair. Temporal output is provisional, not an official replica.
++
++    Pose-valid booleans must represent verified original metadata, not the
++    upstream loader's default True after an identity fallback. The two flow
++    masks and GT masks must come from method-independent input data.
++    """
++    prev = np.asarray(prev_pred, dtype=np.float64)
++    if prev.ndim != 2:
++        raise ValueError("depths must be HxW")
++    shape = prev.shape
++    curr = _array(curr_pred, shape, "current prediction")
++    gt0, gt1 = _array(prev_gt, shape, "previous GT"), _array(curr_gt, shape, "current GT")
++    m0, m1 = _mask(prev_gt_mask, shape, "previous GT mask"), _mask(curr_gt_mask, shape, "current GT mask")
++    frame0, ssi0 = _frame(gt0, prev, m0)
++    frame1, ssi1 = _frame(gt1, curr, m1)
++    k0, _ = _intrinsics(K_prev, "previous K"), _intrinsics(K_curr, "current K")
++    p0, p1 = _pose(prev_c2w, prev_pose_valid, "previous pose"), _pose(curr_c2w, curr_pose_valid, "current pose")
++    if p0 is None or p1 is None:
++        tau = tau_ssi = Score("missing_or_unverified_pose")
++    else:
++        xy, common = backward_correspondence(flow_bwd_px, flow_fwd_px, flow_bwd_valid, flow_fwd_valid, fb_max_error_px)
++        common &= m1 & _sample_mask(m0, xy)
++        transform = np.linalg.inv(p1) @ p0
++        tau = _temporal(prev, curr, xy, common, k0, transform)
++        tau_ssi = (Score("ssi_unavailable", detail="one or both per-frame SSI fits failed")
++                   if ssi0 is None or ssi1 is None else _temporal(ssi0, ssi1, xy, common, k0, transform))
++    return {"previous": {k: asdict(v) for k, v in frame0.items()},
++            "current": {k: asdict(v) for k, v in frame1.items()},
++            "tau5": asdict(tau), "tau5_ssi": asdict(tau_ssi)}
+diff --git a/svr_depth/evaluation/m01_v31/official_eval_entry.py b/svr_depth/evaluation/m01_v31/official_eval_entry.py
+new file mode 100644
+--- /dev/null
++++ b/svr_depth/evaluation/m01_v31/official_eval_entry.py
+@@ -0,0 +1,37 @@
++"""Launch a specified upstream evaluator only when its data root is unambiguous."""
++import argparse
++import os
++from pathlib import Path
++import subprocess
++import sys
++
++
++def checked_environment(data_root, environ):
++    root = Path(data_root).expanduser().resolve(strict=True)
++    if not root.is_dir():
++        raise ValueError("--dataroot must be a directory")
++    old = environ.get("DATAROOT")
++    if old and Path(old).expanduser().resolve() != root:
++        raise ValueError("DATAROOT conflicts with --dataroot; fix the environment")
++    env = dict(environ)
++    env["DATAROOT"] = str(root)
++    return root, env
++
++
++def main(argv=None):
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--official-repo", required=True)
++    parser.add_argument("--dataroot", required=True)
++    args, rest = parser.parse_known_args(argv)
++    root, env = checked_environment(args.dataroot, os.environ)
++    repo = Path(args.official_repo).expanduser().resolve(strict=True)
++    script = repo / "scripts" / "eval.py"
++    if not script.is_file() or not (repo / "velodepth" / "datasets" / "base_dataset.py").is_file():
++        raise ValueError("--official-repo must contain the upstream scripts/eval.py and datasets")
++    print(f"Using upstream evaluator {script}; DATAROOT={root}", flush=True)
++    return subprocess.run([sys.executable, str(script), "--dataroot", str(root), *rest],
++                          cwd=repo, env=env, check=False).returncode
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/svr_depth/evaluation/m01_v31/test_metrics.py b/svr_depth/evaluation/m01_v31/test_metrics.py
+new file mode 100644
+--- /dev/null
++++ b/svr_depth/evaluation/m01_v31/test_metrics.py
+@@ -0,0 +1,229 @@
++import os
++import json
++from pathlib import Path
++import subprocess
++import sys
++import tempfile
++import unittest
++
++import numpy as np
++
++try:
++    from . import metrics
++    from .official_eval_entry import checked_environment
++except ImportError:
++    import metrics
++    from official_eval_entry import checked_environment
++
++
++def inputs(prev, curr=None):
++    prev = np.asarray(prev, dtype=float)
++    curr = prev.copy() if curr is None else np.asarray(curr, dtype=float)
++    h, w = prev.shape
++    mask = np.ones((h, w), dtype=bool)
++    flow = np.zeros((h, w, 2), dtype=float)
++    K = np.array([[3., 0, (w-1)/2], [0, 3., (h-1)/2], [0, 0, 1.]])
++    return dict(prev_pred=prev, curr_pred=curr, prev_gt=prev.copy(), curr_gt=curr.copy(),
++                prev_gt_mask=mask.copy(), curr_gt_mask=mask.copy(), K_prev=K, K_curr=K,
++                prev_c2w=np.eye(4), curr_c2w=np.eye(4), prev_pose_valid=True, curr_pose_valid=True,
++                flow_bwd_px=flow.copy(), flow_fwd_px=flow.copy(), flow_bwd_valid=mask.copy(),
++                flow_fwd_valid=mask.copy(), fb_max_error_px=0.25)
++
++
++class WarpTests(unittest.TestCase):
++    def test_identity_and_true_bounds(self):
++        img = np.arange(12).reshape(3, 4)
++        xy = metrics.pixel_grid(3, 4)
++        got, valid = metrics.bilinear_sample(img, xy)
++        np.testing.assert_allclose(got, img)
++        self.assertTrue(valid.all())
++        xy[0, 0] = [-0.01, 0]
++        xy[1, 0] = [3.01, 1]
++        xy[2, 0] = [0, 3.01]
++        xy[0, 1] = [np.nan, 0]
++        _, valid = metrics.bilinear_sample(img, xy)
++        self.assertFalse(valid[0, 0] or valid[1, 0] or valid[2, 0] or valid[0, 1])
++
++    def test_fractional_invalid_support(self):
++        image = np.array([[1., np.nan, 3.]])
++        xy = np.array([[[0., 0.], [0.5, 0.], [2., 0.]]])
++        got, valid = metrics.bilinear_sample(image, xy)
++        self.assertEqual(valid.tolist(), [[True, False, True]])
++        np.testing.assert_allclose(got[0, [0, 2]], [1, 3])
++
++    def test_known_translation_and_occlusion_direction(self):
++        prev = np.tile(np.arange(1., 6.), (3, 1))
++        curr = np.concatenate((prev[:, :1], prev[:, :-1]), axis=1)
++        kw = inputs(prev, curr)
++        kw["flow_bwd_px"][..., 0] = -1
++        kw["flow_fwd_px"][..., 0] = 1
++        out = metrics.evaluate_pair(**kw)
++        self.assertEqual(out["tau5"]["valid_pixels"], 12)
++        self.assertEqual(out["tau5"]["value"], 1.)
++        # The altered forward vector is on previous-grid x=1: it invalidates
++        # current-grid x=2, not x=1.
++        kw["flow_fwd_px"][1, 1, 0] = 4
++        xy, valid = metrics.backward_correspondence(kw["flow_bwd_px"], kw["flow_fwd_px"],
++                                                     kw["flow_bwd_valid"], kw["flow_fwd_valid"], .25)
++        self.assertTrue(valid[1, 1])
++        self.assertFalse(valid[1, 2])
++        self.assertEqual(metrics.evaluate_pair(**kw)["tau5"]["valid_pixels"], 11)
++
++    def test_flow_masks_and_gt_masks_are_not_interchangeable(self):
++        kw = inputs(np.arange(1., 13.).reshape(3, 4))
++        kw["flow_bwd_valid"][0, 0] = False
++        kw["flow_fwd_valid"][0, 1] = False
++        kw["prev_gt_mask"][0, 2] = False
++        kw["curr_gt_mask"][0, 3] = False
++        self.assertEqual(metrics.evaluate_pair(**kw)["tau5"]["valid_pixels"], 8)
++
++    def test_subpixel_correspondence_requires_all_gt_support(self):
++        kw = inputs(np.ones((2, 4)))
++        kw["flow_bwd_px"][..., 0] = -.5
++        kw["flow_fwd_px"][..., 0] = .5
++        kw["prev_gt_mask"][0, 1] = False
++        out = metrics.evaluate_pair(**kw)
++        # x=0 is out of bounds; source x=1 invalidates current x=1 and x=2.
++        self.assertEqual(out["tau5"]["valid_pixels"], 4)
++
++    def test_resize_crop_and_intrinsics(self):
++        flow = np.empty((2, 3, 2))
++        flow[:] = [1, -0.5]
++        resized = metrics.resize_flow_pixels(flow, (4, 6))
++        np.testing.assert_allclose(resized, np.broadcast_to([2, -1], (4, 6, 2)))
++        cropped = metrics.crop_flow_pixels(resized, (1, 2), (0, 1), (2, 3))
++        np.testing.assert_allclose(cropped, np.broadcast_to([3, 0], (2, 3, 2)))
++        K = np.array([[2., 0, 1], [0, 3, .5], [0, 0, 1]])
++        K2 = metrics.transform_intrinsics(K, (2., 2.), (1, 2))
++        pixel = K @ np.array([.3, .4, 1])
++        resized_crop = np.array([2*(pixel[0]+.5)-.5-2, 2*(pixel[1]+.5)-.5-1, 1])
++        np.testing.assert_allclose(K2 @ np.array([.3, .4, 1]), resized_crop)
++
++    def test_explicit_extent_units(self):
++        f = np.ones((3, 5, 2)) * .25
++        result = metrics.fraction_of_extent_to_pixels(f, (3, 5))
++        np.testing.assert_allclose(result, np.broadcast_to([1, .5], (3, 5, 2)))
++        with self.assertRaises(ValueError):
++            metrics.fraction_of_extent_to_pixels(np.zeros((1, 5, 2)), (1, 5))
++
++
++class MetricTests(unittest.TestCase):
++    def test_tau5_strict_current_depth_denominator(self):
++        kw = inputs([[19.02, 19., 18.98]], [[20., 20., 20.]])
++        score = metrics.evaluate_pair(**kw)["tau5"]
++        self.assertEqual((score["valid_pixels"], score["inliers"]), (3, 1))
++
++    def test_per_frame_ssi_and_temporal_ssi(self):
++        gt = np.arange(1., 13.).reshape(3, 4) / 2 + 1
++        kw = inputs((gt-.3)/1.5, (gt+.4)/2)
++        kw["prev_gt"] = gt.copy()
++        kw["curr_gt"] = gt.copy()
++        out = metrics.evaluate_pair(**kw)
++        self.assertLess(out["tau5"]["value"], 1)
++        self.assertEqual(out["previous"]["delta1_ssi"]["value"], 1)
++        self.assertEqual(out["tau5_ssi"]["value"], 1)
++
++    def test_ssi_strict_trim_degenerate_is_reported(self):
++        kw = inputs(np.ones((2, 3)))
++        out = metrics.evaluate_pair(**kw)
++        self.assertEqual(out["tau5"]["value"], 1)
++        self.assertEqual(out["tau5_ssi"]["status"], "ssi_unavailable")
++
++    def test_camera_translation_compensation(self):
++        kw = inputs(np.full((2, 4), 3.), np.full((2, 4), 2.))
++        kw["curr_c2w"][2, 3] = 1
++        self.assertEqual(metrics.evaluate_pair(**kw)["tau5"]["value"], 1)
++        kw["curr_c2w"][2, 3] = 0
++        self.assertEqual(metrics.evaluate_pair(**kw)["tau5"]["value"], 0)
++
++    def test_missing_or_placeholder_pose(self):
++        kw = inputs(np.ones((2, 3)))
++        kw["prev_pose_valid"] = False  # identity is not proof of a measured pose
++        self.assertEqual(metrics.evaluate_pair(**kw)["tau5"]["status"], "missing_or_unverified_pose")
++        kw["prev_c2w"] = None
++        kw["prev_pose_valid"] = True
++        self.assertEqual(metrics.evaluate_pair(**kw)["tau5"]["status"], "missing_or_unverified_pose")
++        kw["prev_c2w"] = np.zeros((4, 4))
++        with self.assertRaises(ValueError):
++            metrics.evaluate_pair(**kw)
++
++    def test_invalid_prediction_fails_not_drops_mask(self):
++        kw = inputs(np.ones((2, 3)))
++        kw["prev_pred"][0, 0] = float("nan")
++        with self.assertRaisesRegex(ValueError, "do not silently remove"):
++            metrics.evaluate_pair(**kw)
++
++    def test_no_valid_correspondence_has_no_score(self):
++        kw = inputs(np.ones((2, 3)))
++        kw["flow_bwd_px"][..., 0] = 100
++        score = metrics.evaluate_pair(**kw)["tau5"]
++        self.assertEqual(score["status"], "no_valid_pixels")
++        self.assertIsNone(score["value"])
++
++    def test_nonpositive_transformed_depth_is_a_failure(self):
++        kw = inputs(np.ones((2, 3)))
++        kw["curr_c2w"][2, 3] = 2
++        score = metrics.evaluate_pair(**kw)["tau5"]
++        self.assertEqual(score["status"], "invalid_prediction")
++        self.assertEqual(score["valid_pixels"], 6)
++        self.assertIsNone(score["value"])
++
++
++class DataRootTests(unittest.TestCase):
++    def test_dataroot_matches_and_conflicts(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            a, b = Path(tmp) / "a", Path(tmp) / "b"
++            a.mkdir(); b.mkdir()
++            root, env = checked_environment(a, {})
++            self.assertEqual(env["DATAROOT"], str(root))
++            self.assertEqual(checked_environment(a, {"DATAROOT": str(a)})[0], root)
++            with self.assertRaisesRegex(ValueError, "conflicts"):
++                checked_environment(a, {"DATAROOT": str(b)})
++            with self.assertRaises(FileNotFoundError):
++                checked_environment(Path(tmp) / "missing", {})
++
++    def test_launcher_passes_checked_root_to_upstream_process(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            root = Path(tmp)
++            repo, data, other = root / "repo", root / "data", root / "other"
++            (repo / "scripts").mkdir(parents=True)
++            (repo / "velodepth" / "datasets").mkdir(parents=True)
++            (repo / "velodepth" / "datasets" / "base_dataset.py").write_text("")
++            data.mkdir(); other.mkdir()
++            (repo / "scripts" / "eval.py").write_text(
++                "import argparse, json, os\n"
++                "p=argparse.ArgumentParser(); p.add_argument('--dataroot', required=True); "
++                "p.add_argument('--tag'); a=p.parse_args()\n"
++                "print('EVIDENCE='+json.dumps([a.dataroot,os.environ['DATAROOT'],a.tag,os.getcwd()]))\n"
++            )
++            launcher = Path(__file__).with_name("official_eval_entry.py")
++            command = [sys.executable, str(launcher), "--official-repo", str(repo),
++                       "--dataroot", str(data), "--tag", "synthetic"]
++            env = os.environ.copy()
++            env.pop("DATAROOT", None)
++            result = subprocess.run(command, text=True, capture_output=True, env=env, check=True)
++            line = next(line for line in result.stdout.splitlines() if line.startswith("EVIDENCE="))
++            self.assertEqual(json.loads(line[len("EVIDENCE="):]),
++                             [str(data.resolve()), str(data.resolve()), "synthetic", str(repo.resolve())])
++            env["DATAROOT"] = str(other)
++            rejected = subprocess.run(command, text=True, capture_output=True, env=env)
++            self.assertNotEqual(rejected.returncode, 0)
++            self.assertNotIn("EVIDENCE=", rejected.stdout)
++
++    def test_npz_cli_reports_missing_pose_without_creating_outputs(self):
++        kw = inputs(np.arange(1., 13.).reshape(3, 4))
++        for k in ("prev_pose_valid", "curr_pose_valid", "fb_max_error_px", "prev_c2w", "curr_c2w"):
++            del kw[k]
++        with tempfile.TemporaryDirectory() as tmp:
++            path = Path(tmp) / "pair.npz"
++            np.savez(path, **kw)
++            script = Path(__file__).with_name("evaluate_npz.py")
++            result = subprocess.run([sys.executable, str(script), "--input", str(path), "--pair-id", "synthetic",
++                                     "--flow-source", "synthetic", "--pose-source", "none",
++                                     "--fb-max-error-px", ".25"], text=True, capture_output=True, check=True)
++            self.assertIn('"missing_or_unverified_pose"', result.stdout)
++            self.assertEqual([p.name for p in Path(tmp).iterdir()], ["pair.npz"])
++
++
++if __name__ == "__main__":
++    unittest.main()

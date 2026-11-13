@@ -1,0 +1,491 @@
+--- train_pmulti_fresh.py.before
++++ train_pmulti_fresh.py.after
+@@ -10,6 +10,7 @@
+ import csv
+ import hashlib
+ import json
++import os
+ import random
+ import sys
+ from pathlib import Path
+@@ -20,6 +21,29 @@
+ SEEDS = (20261025, 20261101, 20261102)
+ BASE_SHA = '615335cd006663cd567e0a1c74bef7ed622ea733dbff016844ab64e3da22ce3e'
+ STEPS = 1000
++
++def canonical_sha(value):
++    raw=json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode('utf-8')
++    return hashlib.sha256(raw).hexdigest()
++
++def atomic_json(path,value):
++    path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
++    tmp=path.with_name(path.name+'.tmp')
++    tmp.write_text(json.dumps(value,indent=2,ensure_ascii=False),encoding='utf-8')
++    os.replace(tmp,path)
++
++def atomic_csv(path,rows,fieldnames=None):
++    path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
++    rows=list(rows)
++    tmp=path.with_name(path.name+'.tmp')
++    if fieldnames is None:
++        fieldnames=list(dict.fromkeys(k for row in rows for k in row.keys()))
++    with tmp.open('w',newline='',encoding='utf-8-sig') as f:
++        writer=csv.DictWriter(f,fieldnames=fieldnames,extrasaction='ignore')
++        writer.writeheader()
++        if rows:writer.writerows(rows)
++        f.flush();os.fsync(f.fileno())
++    os.replace(tmp,path)
+ 
+ def sha(path):
+     h = hashlib.sha256()
+@@ -53,11 +77,21 @@
+     p.add_argument('--seed', type=int, choices=SEEDS, required=True)
+     p.add_argument('--pairs-dir', default=str(ROOT / 'outputs/gt4a2_exp1'))
+     p.add_argument('--out-dir', required=True, help='New, seed-specific output directory')
++    p.add_argument('--cache-root', default=None,
++                   help='Shared verified cache root; defaults to <out-dir>/cache')
++    p.add_argument('--resume', action='store_true',
++                   help='Resume only from a matching, validated recovery checkpoint')
+     p.add_argument('--smoke', action='store_true', help='3 updates; does not save a formal checkpoint')
+     args = p.parse_args()
+     snapshot, pairs_dir, out = (Path(x).expanduser().resolve() for x in (args.snapshot, args.pairs_dir, args.out_dir))
+-    if out.exists():
++    if args.resume and args.smoke:
++        raise RuntimeError('--resume cannot be combined with --smoke')
++    if args.resume:
++        if not out.is_dir():
++            raise FileNotFoundError(f'--resume requires an existing output directory: {out}')
++    elif out.exists():
+         raise FileExistsError(f'Refusing to overwrite existing output: {out}')
++    cache_root = Path(args.cache_root).expanduser().resolve() if args.cache_root else (out / 'cache')
+     if not (snapshot / 'config.json').is_file() or sha(snapshot / 'model.safetensors') != BASE_SHA:
+         raise RuntimeError('Missing snapshot or wrong pretrained model hash')
+     # The untouched historical helpers import torch only after argument parsing.
+@@ -81,51 +115,154 @@
+     init_sha = exp1.state_sha256(init_state)
+     del model
+     torch.cuda.empty_cache()
+-    out.mkdir(parents=True, exist_ok=False)
+-    identity = {'seed': args.seed, 'smoke': args.smoke, 'backbone_sha256': BASE_SHA,
+-                'initial_head_sha256': init_sha, 'initialization_seed': 20261024,
+-                'pair_hashes': {s: sha(paths[s]) for s in SEQUENCES},
+-                'protocol': 'fresh initialization; P_multi; 32-frame cycles; pre_readout'}
+-    (out / 'run_identity.json').write_text(json.dumps(identity, indent=2), encoding='utf-8')
+-    readers = {}
+-    for seq in SEQUENCES:
+-        cache = c3.build_cycle_cache({'snapshot': snapshot, 'crowd2': paths[seq]}, manifests[seq],
+-                                     out / 'cache' / seq, torch.device('cuda'), limit=ncycles)
+-        readers[seq] = c3.CycleReader(cache, max_items=2)
++
+     slots = [(s, i) for s in SEQUENCES for i in range(ncycles)]
+     order = [0, 1, 2] if args.smoke else balanced_order(args.seed)
++    order_sha = hashlib.sha256(','.join(map(str, order)).encode()).hexdigest()
++    pair_hashes = {s: sha(paths[s]) for s in SEQUENCES}
++    source_files = {
++        'train_pmulti_fresh.py': Path(__file__).resolve(),
++        'gt4a2_c3_closed_loop.py': Path(c3.__file__).resolve(),
++        'gt4a2_exp1_train_eval.py': Path(exp1.__file__).resolve(),
++        'gt2_fixed_clip_repair_train.py': Path(gt2.__file__).resolve(),
++        'decoder_velo.py': ROOT / 'velodepth/models/decoder_velo.py',
++        'persistent_feature_repair.py': ROOT / 'velodepth/models/persistent_feature_repair.py',
++    }
++    source_hashes = {name: sha(path) for name,path in source_files.items()}
++    sample_order_doc = {
++        'sample_order': order,
++        'sample_order_sha256': order_sha,
++        'cycle_slots': [list(x) for x in slots],
++        'cycle_slots_sha256': canonical_sha([list(x) for x in slots]),
++    }
++    identity_core = {
++        'seed': args.seed,
++        'smoke': args.smoke,
++        'backbone_sha256': BASE_SHA,
++        'snapshot_config_sha256': sha(snapshot / 'config.json'),
++        'initial_head_sha256': init_sha,
++        'initialization_seed': 20261024,
++        'pair_hashes': pair_hashes,
++        'protocol': 'fresh initialization; P_multi; 32-frame cycles; pre_readout',
++        'optimizer_steps': len(order),
++        'formal_optimizer_steps': STEPS,
++        'tbptt_frames': 4,
++        'refresh_frames': 32,
++        'cycle_slots': [list(x) for x in slots],
++        'sample_order_sha256': order_sha,
++        'source_hashes': source_hashes,
++        'cache_root': str(cache_root),
++    }
++    identity_hash = canonical_sha(identity_core)
++    identity = {**identity_core, 'run_identity_sha256': identity_hash}
++    sample_order_doc['run_identity_sha256'] = identity_hash
++
++    shared_readers = {}
++    if args.cache_root:
++        # Explicit shared caches are read-only: all manifests and cycle SHA256s
++        # must pass before the training output directory is created.
++        for seq in SEQUENCES:
++            cache = c3.build_cycle_cache({'snapshot': snapshot, 'crowd2': paths[seq]}, manifests[seq],
++                                         cache_root / seq, torch.device('cuda'), limit=ncycles,
++                                         require_complete=True)
++            shared_readers[seq] = c3.CycleReader(cache, max_items=2)
++
++    train_dir = out / 'training' / 'P_multi'
++    recovery_path = train_dir / 'gt4a2_c3_C_recovery.pt'
++    if args.resume:
++        identity_path = out / 'run_identity.json'
++        order_path = out / 'sample_order.json'
++        if not identity_path.is_file() or not order_path.is_file():
++            raise RuntimeError('--resume requires run_identity.json and sample_order.json')
++        saved_identity = json.loads(identity_path.read_text(encoding='utf-8'))
++        saved_order = json.loads(order_path.read_text(encoding='utf-8'))
++        if saved_identity != identity:
++            raise RuntimeError('Run identity mismatch; refusing to resume')
++        if saved_order != sample_order_doc:
++            raise RuntimeError('Sample order/cycle slots mismatch; refusing to resume')
++        if not recovery_path.is_file():
++            raise RuntimeError(f'Recovery checkpoint missing; refusing to restart: {recovery_path}')
++    else:
++        out.mkdir(parents=True, exist_ok=False)
++        atomic_json(out / 'run_identity.json', identity)
++        atomic_json(out / 'sample_order.json', sample_order_doc)
++    train_dir.mkdir(parents=True, exist_ok=True)
++
++    if not args.cache_root:
++        readers = {}
++        for seq in SEQUENCES:
++            cache = c3.build_cycle_cache({'snapshot': snapshot, 'crowd2': paths[seq]}, manifests[seq],
++                                         cache_root / seq, torch.device('cuda'), limit=ncycles)
++            readers[seq] = c3.CycleReader(cache, max_items=2)
++    else:
++        readers = shared_readers
+     reader = SceneReader(readers, slots)
+-    train_dir = out / 'training' / 'P_multi'
+-    train_dir.mkdir(parents=True)
+     torch.manual_seed(args.seed); np.random.seed(args.seed); random.seed(args.seed)
+     torch.cuda.manual_seed_all(args.seed)
+     model = gt2.load_model(snapshot, 'pre_readout', torch.device('cuda'))
+     c3.train_mode('C', model, reader, init_state, order, train_dir, torch.device('cuda'),
+-                  snapshot, paths['crowd2'], len(order), resume=False, smoke=args.smoke)
++                  snapshot, paths['crowd2'], len(order), resume=args.resume, smoke=args.smoke,
++                  run_identity_sha256=identity_hash)
+     if args.smoke:
+         print('[PASS] smoke only; no formal checkpoint saved', flush=True)
+         return
+     cp = train_dir / 'gt4a2_c3_C_final_step1000.pt'
+     payload = torch.load(cp, map_location='cpu', weights_only=False)
+-    # C3's single-scene metadata does not describe these multi-scene slots.
+-    payload.pop('training_original_rgb_indices', None)
+-    payload.update({'experiment': 'fresh P_multi', 'y04_label': 'Y04_P_multi',
+-        'y04_kind': 'persistent', 'training_sequences': list(SEQUENCES),
+-        'training_cycle_slots': [list(x) for x in slots], 'optimizer_steps': STEPS,
+-        'y04_outer_seed': args.seed, 'y04_sample_order_sha256': hashlib.sha256(','.join(map(str, order)).encode()).hexdigest(),
+-        'y04_initial_head_sha256': init_sha, 'fresh_initialization': True,
+-        'training_pair_sha256': identity['pair_hashes']})
+-    tmp = cp.with_suffix('.fresh.tmp')
+-    torch.save(payload, tmp); tmp.replace(cp)
++    expected_base = {
++        'mode_label': 'C',
++        'mode': 'pre_readout',
++        'step_count': STEPS,
++        'learning_rate': 1e-4,
++        'refresh_interval': 32,
++        'tbptt_frames': 4,
++        'training_cycle_count': 24,
++        'seed': 20261024,
++        'trainable_params': 170496,
++        'backbone_frozen': True,
++        'sample_order_sha256': order_sha,
++        'initial_head_state_sha256': init_sha,
++        'pretrained_weights_sha256': BASE_SHA,
++        'training_pair_csv_sha256': pair_hashes['crowd2'],
++    }
++    for key,value in expected_base.items():
++        if payload.get(key)!=value:
++            raise RuntimeError(f'Final checkpoint metadata mismatch: {key}')
++    wrapped_fields = {
++        'experiment': 'fresh P_multi',
++        'y04_label': 'Y04_P_multi',
++        'y04_kind': 'persistent',
++        'training_sequences': list(SEQUENCES),
++        'training_cycle_slots': [list(x) for x in slots],
++        'optimizer_steps': STEPS,
++        'y04_outer_seed': args.seed,
++        'y04_sample_order_sha256': order_sha,
++        'y04_initial_head_sha256': init_sha,
++        'fresh_initialization': True,
++        'training_pair_sha256': pair_hashes,
++    }
++    already_wrapped = payload.get('fresh_initialization') is True
++    if already_wrapped:
++        for key,value in wrapped_fields.items():
++            if payload.get(key)!=value:
++                raise RuntimeError(f'Existing P_multi checkpoint wrapper mismatch: {key}')
++    else:
++        payload.pop('training_original_rgb_indices', None)
++        payload.update(wrapped_fields)
++        tmp = cp.with_name(cp.name + '.fresh.tmp')
++        torch.save(payload, tmp)
++        os.replace(tmp, cp)
++
+     summary_path = train_dir / 'gt4a2_c3_C_training_summary.json'
+     summary = json.loads(summary_path.read_text(encoding='utf-8'))
+     summary.update({'checkpoint_sha256': sha(cp), 'fresh_initialization': True,
+-                    'y04_outer_seed': args.seed, 'pair_hashes': identity['pair_hashes']})
+-    summary_path.write_text(json.dumps(summary, indent=2), encoding='utf-8')
+-    with (out / 'checkpoint_manifest_row.csv').open('w', newline='', encoding='utf-8') as f:
+-        w = csv.DictWriter(f, fieldnames=['seed','checkpoint_path','expected_sha256','training_summary_path','training_log_path','notes'])
+-        w.writeheader(); w.writerow({'seed': args.seed, 'checkpoint_path': str(cp), 'expected_sha256': sha(cp),
+-            'training_summary_path': str(summary_path), 'training_log_path': '', 'notes': 'fresh P_multi; common initialization seed 20261024'})
++                    'y04_outer_seed': args.seed, 'pair_hashes': pair_hashes})
++    atomic_json(summary_path, summary)
++    manifest_path = out / 'checkpoint_manifest_row.csv'
++    atomic_csv(manifest_path, [{
++        'seed': args.seed, 'checkpoint_path': str(cp), 'expected_sha256': sha(cp),
++        'training_summary_path': str(summary_path), 'training_log_path': '',
++        'notes': 'fresh P_multi; common initialization seed 20261024'
++    }], fieldnames=['seed','checkpoint_path','expected_sha256','training_summary_path','training_log_path','notes'])
+     print(f'[PASS] fresh P_multi checkpoint: {cp}', flush=True)
+ 
+ if __name__ == '__main__':
+--- gt4a2_c3_closed_loop.py.before
++++ gt4a2_c3_closed_loop.py.after
+@@ -16,6 +16,7 @@
+ import json
+ import os
+ import platform
++import random
+ import sys
+ import time
+ import traceback
+@@ -45,10 +46,24 @@
+     return exp1.sha256_file(Path(p))
+ 
+ def write_json(p,obj):
+-    exp1.write_json(Path(p),obj)
++    p=Path(p);p.parent.mkdir(parents=True,exist_ok=True)
++    tmp=p.with_name(p.name+'.tmp')
++    tmp.write_text(json.dumps(obj,indent=2,ensure_ascii=False),encoding='utf-8')
++    os.replace(tmp,p)
+ 
+ def write_csv(p,rows):
+-    exp1.write_csv(Path(p),rows)
++    p=Path(p);p.parent.mkdir(parents=True,exist_ok=True)
++    tmp=p.with_name(p.name+'.tmp')
++    rows=list(rows)
++    if not rows:
++        tmp.write_text('',encoding='utf-8')
++    else:
++        keys=list(dict.fromkeys(k for row in rows for k in row.keys()))
++        with tmp.open('w',newline='',encoding='utf-8-sig') as f:
++            writer=csv.DictWriter(f,fieldnames=keys,extrasaction='ignore')
++            writer.writeheader();writer.writerows(rows)
++            f.flush();os.fsync(f.fileno())
++    os.replace(tmp,p)
+ 
+ def config_args():
+     ap=argparse.ArgumentParser(description='GT4-A2-C3 closed-loop state training')
+@@ -149,10 +164,14 @@
+         'image_residual':item['image_residual'].to(device),
+         'validity_mask':shape['validity_mask']}
+ 
+-def build_cycle_cache(paths,rows,out_dir,device,limit=None):
++def build_cycle_cache(paths,rows,out_dir,device,limit=None,require_complete=False):
+     cache_dir=out_dir/'cycle_cache'
++    if require_complete and not cache_dir.is_dir():
++        raise RuntimeError(f'Shared cache directory missing; refusing to create or modify it: {cache_dir}')
+     cache_dir.mkdir(parents=True,exist_ok=True)
+     meta_path=cache_dir/'cache_manifest.json'
++    if require_complete and not meta_path.is_file():
++        raise RuntimeError(f'Shared cache manifest missing; refusing to create it: {meta_path}')
+     signature={
+         'format':CACHE_FORMAT,'pretrained_weights_sha256':sha(paths['snapshot']/'model.safetensors'),
+         'pair_sha256':sha(paths['crowd2']),
+@@ -183,6 +202,9 @@
+     if not missing:
+         print(f'[CACHE] all {n} cycles already prepared, verified',flush=True)
+         return cache_dir
++    if require_complete:
++        raise RuntimeError(
++            f'Shared cache is incomplete or has invalid cycle files; refusing to modify it: {cache_dir}; missing={missing}')
+     model=gt2.load_model(paths['snapshot'],'off',device)
+     model.eval()
+     shape=exp1.shape_info_for(model,Path(rows[0]['rgb_path']),device)
+@@ -349,32 +371,78 @@
+             'grad_scaler_scale':float(scaler.get_scale()),
+             'segment_lengths':','.join(map(str,segment_lengths))}
+ 
+-def resume_states(out_dir,mode,optimizer,scaler,head,order_sha,init_sha,requested):
++def resume_states(out_dir,mode,optimizer,scaler,head,order_sha,init_sha,requested,
++                  run_identity_sha256=''):
+     path=out_dir/f'gt4a2_c3_{mode}_recovery.pt'
+-    if not path.is_file():return 0
++    if not path.is_file():
++        raise RuntimeError(f'Recovery checkpoint missing; refusing to restart: {path}')
+     ckpt=torch.load(path,map_location='cpu',weights_only=False)
+-    if (ckpt['mode']!=mode or ckpt['sample_order_sha256']!=order_sha or
+-        ckpt['initial_head_state_sha256']!=init_sha or ckpt['steps_requested']!=requested):
++    saved_identity=ckpt.get('run_identity_sha256','')
++    if (ckpt.get('mode')!=mode or ckpt.get('sample_order_sha256')!=order_sha or
++        ckpt.get('initial_head_state_sha256')!=init_sha or
++        ckpt.get('steps_requested')!=requested or
++        saved_identity!=(run_identity_sha256 or '')):
+         raise RuntimeError(f'Recovery checkpoint metadata mismatch: {path}')
++    step=int(ckpt.get('last_completed_step',-1))
++    if step<0 or step>requested or (step not in (0,requested) and step%25!=0):
++        raise RuntimeError(f'Invalid recovery step {step}: {path}')
+     head.load_state_dict(ckpt['repair_head_state_dict'],strict=True)
+     optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+     scaler.load_state_dict(ckpt['scaler_state_dict'])
+     torch.set_rng_state(ckpt['torch_rng'])
+     if torch.cuda.is_available():torch.cuda.set_rng_state(ckpt['cuda_rng'])
+     np.random.set_state(ckpt['numpy_rng'])
+-    return int(ckpt['last_completed_step'])
+-
+-def save_recovery(out_dir,mode,step,head,optimizer,scaler,order_sha,init_sha,requested):
++    if 'python_rng' in ckpt:random.setstate(ckpt['python_rng'])
++    elif run_identity_sha256:
++        raise RuntimeError('P_multi recovery is missing Python RNG state')
++    return step
++
++def save_recovery(out_dir,mode,step,head,optimizer,scaler,order_sha,init_sha,requested,
++                  run_identity_sha256=''):
+     p=out_dir/f'gt4a2_c3_{mode}_recovery.pt'
+     obj={'mode':mode,'last_completed_step':step,'steps_requested':requested,
+          'sample_order_sha256':order_sha,'initial_head_state_sha256':init_sha,
++         'run_identity_sha256':run_identity_sha256 or '',
+          'repair_head_state_dict':initial_state(head),'optimizer_state_dict':optimizer.state_dict(),
+          'scaler_state_dict':scaler.state_dict(),'torch_rng':torch.get_rng_state(),
+-         'cuda_rng':torch.cuda.get_rng_state(),'numpy_rng':np.random.get_state()}
+-    tmp=p.with_suffix('.tmp');torch.save(obj,tmp);os.replace(tmp,p)
++         'cuda_rng':torch.cuda.get_rng_state(),'numpy_rng':np.random.get_state(),
++         'python_rng':random.getstate()}
++    tmp=p.with_name(p.name+'.tmp')
++    torch.save(obj,tmp)
++    os.replace(tmp,p)
++
++def reconcile_training_curve(curve_path,recovery_step,requested,sample_order,mode):
++    curve_path=Path(curve_path)
++    if not curve_path.is_file():
++        if recovery_step:
++            raise RuntimeError(f'Training curve missing for recovery step {recovery_step}: {curve_path}')
++        return []
++    with curve_path.open('r',encoding='utf-8-sig',newline='') as f:
++        rows=list(csv.DictReader(f))
++    steps=[]
++    for row in rows:
++        try:step=int(row['step'])
++        except Exception as e:raise RuntimeError('Training curve contains an invalid step') from e
++        if step<1 or step>requested:raise RuntimeError(f'Invalid training curve step: {step}')
++        if row.get('mode')!=mode:raise RuntimeError('Training curve mode mismatch')
++        if int(row.get('cycle',-1))!=int(sample_order[step-1]):
++            raise RuntimeError(f'Training curve sample-order mismatch at step {step}')
++        steps.append(step)
++    if steps!=sorted(steps) or len(steps)!=len(set(steps)):
++        raise RuntimeError('Training curve steps are duplicated or out of order')
++    committed=[row for row in rows if int(row['step'])<=recovery_step]
++    committed_steps=[int(row['step']) for row in committed]
++    if committed_steps!=list(range(1,recovery_step+1)):
++        raise RuntimeError(
++            f'Training curve is not contiguous through recovery step {recovery_step}: '
++            f'last={committed_steps[-1] if committed_steps else None}, rows={len(committed_steps)}')
++    if len(rows)!=len(committed):
++        write_csv(curve_path,committed)
++        print(f'[RESUME] truncated {len(rows)-len(committed)} uncommitted CSV rows after step {recovery_step}',flush=True)
++    return committed
+ 
+ def train_mode(label,model,reader,init_head_state,sample_order,out_dir,device,
+-               snapshot,pair_csv,steps,resume=False,smoke=False):
++               snapshot,pair_csv,steps,resume=False,smoke=False,run_identity_sha256=''):
+     print(f'[TRAIN {label}] loading model, closed-loop step = 32-frame cycle',flush=True)
+     head=model.pixel_decoder.persistent_feature_repair
+     if head is None:raise RuntimeError('Repair head absent')
+@@ -389,16 +457,20 @@
+     scaler=torch.amp.GradScaler('cuda',enabled=True)
+     order_sha=hashlib.sha256(','.join(map(str,sample_order)).encode()).hexdigest()
+     init_sha=exp1.state_sha256(init_head_state)
+-    start_step=resume_states(out_dir,label,optimizer,scaler,head,order_sha,init_sha,steps) if resume else 0
+-    if start_step>steps:raise RuntimeError('Recovery step beyond target')
+     curve_path=out_dir/f'gt4a2_c3_{label}_training_curve.csv'
+-    if start_step and not curve_path.is_file():raise RuntimeError('Resume training curve missing')
+-    if resume and not start_step and curve_path.is_file():
+-        raise RuntimeError('Training curve exists but no recoverable state: refuse to restart while resuming')
+-    if not start_step and curve_path.is_file() and not smoke:
+-        raise RuntimeError(f'Existing curve would be overwritten: {curve_path}. Use --resume or a new output dir.')
++    if resume:
++        start_step=resume_states(out_dir,label,optimizer,scaler,head,order_sha,init_sha,
++                                 steps,run_identity_sha256)
++        curve=reconcile_training_curve(curve_path,start_step,steps,sample_order,label)
++    else:
++        start_step=0
++        if curve_path.is_file() and not smoke:
++            raise RuntimeError(f'Existing curve would be overwritten: {curve_path}. Use --resume or a new output dir.')
++        curve=[]
++        if not smoke:
++            save_recovery(out_dir,label,0,head,optimizer,scaler,order_sha,init_sha,
++                          steps,run_identity_sha256)
+     start=time.perf_counter()
+-    curve=[]
+     for step in range(start_step+1,steps+1):
+         cyc=sample_order[step-1]
+         c=reader.load(cyc)
+@@ -418,21 +490,15 @@
+                   f'segments={row["gradient_segments"]} '
+                   f'vram={row["peak_cuda_allocated_gib"]:.2f}GiB',flush=True)
+         if not smoke and (step%25==0 or step==steps):
+-            if start_step:
+-                # Append only completed steps, preserving previous records.
+-                with curve_path.open('r',encoding='utf-8-sig',newline='') as f:
+-                    old=list(csv.DictReader(f))
+-                curve=[*old,*curve]
+-                start_step=0
++            # Commit curve first; recovery then defines the durable optimizer state.
+             write_csv(curve_path,curve)
+-        if not smoke and (step%100==0 or step==steps):
+-            save_recovery(out_dir,label,step,head,optimizer,scaler,order_sha,init_sha,steps)
++            save_recovery(out_dir,label,step,head,optimizer,scaler,order_sha,init_sha,
++                          steps,run_identity_sha256)
+     if smoke:
+         print(f'[SMOKE {label}] one update completed; no formal checkpoint saved',flush=True)
+         return {'smoke':True,'mode':label,'steps':steps,'last_loss':curve[-1]['mean_log_depth_loss_before_update']}
+     head_dict=initial_state(head)
+     checkpoint=out_dir/f'gt4a2_c3_{label}_final_step1000.pt'
+-    if checkpoint.exists():raise RuntimeError(f'Final checkpoint exists: {checkpoint}')
+     meta={
+         'experiment':'GT4-A2-C3 closed-loop training',
+         'mode_label':label,'mode':MODES[label],'step_count':STEPS,
+@@ -447,10 +513,32 @@
+         'pretrained_weights_sha256':sha(snapshot/'model.safetensors'),
+         'training_pair_csv_sha256':sha(pair_csv),
+         'checkpoint_policy':'last optimizer update, no validation selection'}
+-    torch.save(meta,checkpoint)
+-    loaded=torch.load(checkpoint,map_location='cpu',weights_only=False)
+-    if exp1.state_sha256(loaded['repair_head_state_dict'])!=exp1.state_sha256(head_dict):
+-        raise RuntimeError('Final checkpoint reload mismatch')
++    if checkpoint.exists():
++        if not resume or start_step!=steps:
++            raise RuntimeError(f'Final checkpoint exists without a completed matching recovery: {checkpoint}')
++        loaded=torch.load(checkpoint,map_location='cpu',weights_only=False)
++        checks={
++            'mode_label':label,
++            'mode':MODES[label],
++            'step_count':STEPS,
++            'sample_order_sha256':order_sha,
++            'initial_head_state_sha256':init_sha,
++            'pretrained_weights_sha256':sha(snapshot/'model.safetensors'),
++            'training_pair_csv_sha256':sha(pair_csv),
++        }
++        for key,value in checks.items():
++            if loaded.get(key)!=value:
++                raise RuntimeError(f'Existing final checkpoint metadata mismatch: {key}')
++        if exp1.state_sha256(loaded['repair_head_state_dict'])!=exp1.state_sha256(head_dict):
++            raise RuntimeError('Existing final checkpoint does not match recovered final head')
++        print(f'[RESUME] validated existing final checkpoint: {checkpoint}',flush=True)
++    else:
++        tmp=checkpoint.with_name(checkpoint.name+'.tmp')
++        torch.save(meta,tmp)
++        os.replace(tmp,checkpoint)
++        loaded=torch.load(checkpoint,map_location='cpu',weights_only=False)
++        if exp1.state_sha256(loaded['repair_head_state_dict'])!=exp1.state_sha256(head_dict):
++            raise RuntimeError('Final checkpoint reload mismatch')
+     summary={'mode':label,'steps':STEPS,'closed_loop_training':True,
+              'trainable_parameters':170496,'elapsed_sec':time.perf_counter()-start,
+              'initial_head_state_sha256':init_sha,'final_head_state_sha256':exp1.state_sha256(head_dict),

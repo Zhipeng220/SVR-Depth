@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "protocol": "svr-depth-crosssource-v2-tartanair-kitti-sceneflow",
+  "dataset_ids": [
+    "tartanair"
+  ],
+  "manifests": {
+    "train": {
+      "tartanair": [
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/carwelding_Hard_P000_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/carwelding_Hard_P001_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/carwelding_Hard_P002_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/carwelding_Hard_P003_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/japanesealley_Hard_P000_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/japanesealley_Hard_P001_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/japanesealley_Hard_P002_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/japanesealley_Hard_P003_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/japanesealley_Hard_P004_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/japanesealley_Hard_P005_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/office_Hard_P000_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/office_Hard_P001_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/office_Hard_P002_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/office_Hard_P003_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/office_Hard_P004_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/office_Hard_P005_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/office_Hard_P006_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/train/tartanair/office_Hard_P007_run00.json"
+      ]
+    },
+    "val": {
+      "tartanair": [
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/val/tartanair/seasonsforest_Hard_P001_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/val/tartanair/seasonsforest_Hard_P002_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/val/tartanair/seasonsforest_Hard_P004_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/val/tartanair/seasonsforest_Hard_P005_run00.json",
+        "/root/autodl-tmp/datasets/crosssource/tartanair/processed_v2/manifests/val/tartanair/seasonsforest_Hard_P006_run00.json"
+      ]
+    }
+  },
+  "training": {
+    "window_frames": 20,
+    "tbptt_frames": 4,
+    "min_supervised_frames": 1,
+    "dataset_weights": {
+      "tartanair": 1.0
+    },
+    "sampling": "dataset-weighted -> scene-uniform -> sequence-uniform -> window-uniform"
+  }
+}

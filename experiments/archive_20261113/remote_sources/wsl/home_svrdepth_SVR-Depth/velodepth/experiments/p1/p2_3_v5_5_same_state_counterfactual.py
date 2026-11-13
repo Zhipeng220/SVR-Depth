@@ -1,0 +1,696 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""P2.3 v5.5 same-state counterfactual gain diagnosis.
+
+This experiment captures pre-action states on each actual online policy trajectory,
+then forks B0 (propagation without writeback) and B1-aligned state-writeback branches
+from the exact same state snapshot. It does not train/update VeloDepth weights.
+The future branch protocol intentionally matches P1.5: force propagation for H steps,
+record restart requests, but do not execute future restarts.
+"""
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import json
+import math
+import sys
+import time
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import torch
+
+HERE = Path(__file__).resolve().parent
+BASE_SCRIPT = HERE / "p2_3_online_replay_v5_4_budget_sweep.py"
+if not BASE_SCRIPT.is_file():
+    raise FileNotFoundError(
+        f"Required helper script is missing: {BASE_SCRIPT}. "
+        "Upload p2_3_online_replay_v5_4_budget_sweep.py beside this script."
+    )
+
+_spec = importlib.util.spec_from_file_location("svrdepth_v54_replay", BASE_SCRIPT)
+if _spec is None or _spec.loader is None:
+    raise RuntimeError(f"Cannot import helper script: {BASE_SCRIPT}")
+replay = importlib.util.module_from_spec(_spec)
+sys.modules[_spec.name] = replay
+_spec.loader.exec_module(replay)
+
+cf = replay.cf
+StreamState = replay.StreamState
+VeloDepthStream = replay.VeloDepthStream
+VeloDepth = replay.VeloDepth
+capture_state = replay.capture_state
+restore_state = replay.restore_state
+clone_payload = replay.clone_payload
+build_online_features = replay.build_online_features
+capture_packed_inputs_without_full_inference = replay.capture_packed_inputs_without_full_inference
+match_gt_tolerant = replay.match_gt_tolerant
+OnlineRidge = replay.OnlineRidge
+write_csv = replay.write_csv
+sync_cuda = replay.sync_cuda
+warmup_policy = replay.warmup_policy
+summarize = replay.summarize
+torch = replay.torch
+np = replay.np
+pd = replay.pd
+
+PREDICTOR_NAMES = (
+    "causal_budget_state_only",
+    "causal_budget_motion_plus_learned",
+)
+POLICIES = (
+    "auto",
+    "budget_fixed",
+    "causal_budget_state_only",
+    "causal_budget_motion_plus_learned",
+)
+TARGET = "G_state_absrel_discounted_per_valid_frame"
+
+
+def make_fixed_budget_frames(frames, offset, stride, min_gap, k):
+    eligible = [
+        t for t in range(offset, frames, stride)
+        if t >= min_gap
+    ]
+    if k < 0 or k > len(eligible):
+        raise ValueError(f"K={k} outside [0,{len(eligible)}] eligible anchors")
+    if k == 0:
+        return set(), eligible
+    if k == len(eligible):
+        return set(eligible), eligible
+    indices = np.rint(np.linspace(0, len(eligible) - 1, k)).astype(int).tolist()
+    selected = {eligible[i] for i in indices}
+    if len(selected) != k:
+        raise RuntimeError("Unable to construct unique fixed-budget anchors")
+    return selected, eligible
+
+
+def finite_mean(values):
+    arr = np.asarray(values, dtype=float)
+    arr = arr[np.isfinite(arr)]
+    return float(arr.mean()) if arr.size else float("nan")
+
+
+def same_state_counterfactual(
+    model, stream, inputs_reference, total_frames, anchor, state_before,
+    records, gt, paddings, padded_shape, horizon, gamma
+):
+    """Return a P1.5-compatible B0-vs-B1 future gain from one exact state snapshot."""
+    state_snapshot_source = cf.clone_state(state_before)
+    pre_snapshot = capture_state(model, state_snapshot_source)
+    result = {
+        "anchor_frame": int(anchor),
+        "horizon_H": int(horizon),
+        "gamma": float(gamma),
+        "status": "pending",
+        "future_frames_requested": int(horizon),
+        "future_metric_pairs": 0,
+        "future_frames_with_gt": 0,
+        "future_restart_requests_B0_ignored": 0,
+        "future_restart_requests_B1_ignored": 0,
+        "G_state_absrel_discounted": float("nan"),
+        TARGET: float("nan"),
+        "mean_future_absrel_B0": float("nan"),
+        "mean_future_absrel_B1": float("nan"),
+        "mean_future_rmse_B0": float("nan"),
+        "mean_future_rmse_B1": float("nan"),
+        "mean_future_delta1_B0": float("nan"),
+        "mean_future_delta1_B1": float("nan"),
+    }
+    try:
+        # B0 anchor: accept propagation output and propagated state.
+        b0_state = cf.clone_state(state_snapshot_source)
+        restore_state(model, b0_state, pre_snapshot)
+        anchor_inputs = clone_payload(inputs_reference)
+        out_b0_anchor, b0_state, anchor_restart = stream.propagate_step(
+            anchor_inputs, anchor, b0_state, total_frames
+        )
+        if anchor_restart:
+            result["status"] = "skipped_anchor_restart"
+            result["reason"] = "Anchor propagation requested restart; P1.5 excludes such anchors."
+            return result
+
+        # Save the model runtime after the common propagation anchor branch.
+        post_prop_snapshot = capture_state(model, b0_state)
+
+        # B1 refresh candidate is computed from the same pre-action snapshot.
+        refresh_state = cf.clone_state(state_snapshot_source)
+        restore_state(model, refresh_state, pre_snapshot)
+        refresh_inputs = clone_payload(inputs_reference)
+        _refresh_output, refresh_state = stream.keyframe_step(
+            refresh_inputs, anchor, refresh_state, total_frames
+        )
+
+        # Both future branches start from the same propagation result. B1 commits
+        # only the four persistent geometry fields; scheduler/fast-tail stay shared.
+        b1_state = cf.clone_state(b0_state)
+        for field_name in cf.COMMIT_FIELDS:
+            value = getattr(refresh_state, field_name)
+            if value is None:
+                raise RuntimeError(f"Keyframe candidate field {field_name} is None at anchor {anchor}")
+            setattr(b1_state, field_name, cf.clone_payload(value))
+
+        rows_b0, rows_b1 = [], []
+        discounted_sum = 0.0
+        pair_count = 0
+        gt_count = 0
+        restart_b0 = 0
+        restart_b1 = 0
+
+        for k in range(1, horizon + 1):
+            frame_idx = anchor + k
+            if frame_idx >= total_frames:
+                raise RuntimeError(
+                    f"Anchor {anchor} does not have a complete H={horizon} future window "
+                    f"inside T={total_frames}"
+                )
+
+            # Match the P1.5 controlled counterfactual: synchronize scheduler state,
+            # force both branches through propagation, and log but do not execute
+            # restart requests in the future window.
+            cf.sync_scheduler(b1_state, b0_state)
+
+            cf.restore_runtime(model, post_prop_snapshot)
+            in_b1 = clone_payload(inputs_reference)
+            out_b1, b1_state, restart1 = stream.propagate_step(
+                in_b1, frame_idx, b1_state, total_frames
+            )
+
+            cf.restore_runtime(model, post_prop_snapshot)
+            in_b0 = clone_payload(inputs_reference)
+            out_b0, b0_state, restart0 = stream.propagate_step(
+                in_b0, frame_idx, b0_state, total_frames
+            )
+
+            cf.sync_scheduler(b1_state, b0_state)
+            restart_b1 += int(bool(restart1))
+            restart_b0 += int(bool(restart0))
+
+            m0 = cf.eval_output(out_b0, model, paddings, padded_shape, gt[frame_idx])
+            m1 = cf.eval_output(out_b1, model, paddings, padded_shape, gt[frame_idx])
+            rows_b0.append(m0)
+            rows_b1.append(m1)
+            gt_count += int(bool(records[frame_idx]["gt_available"]))
+
+            a0, a1 = m0.get("absrel", float("nan")), m1.get("absrel", float("nan"))
+            if math.isfinite(float(a0)) and math.isfinite(float(a1)):
+                # Positive gain means B1 writeback lowers future AbsRel.
+                discounted_sum += (gamma ** k) * (float(a0) - float(a1))
+                pair_count += 1
+
+        result.update({
+            "status": "ok" if pair_count else "no_valid_metric_pairs",
+            "future_metric_pairs": int(pair_count),
+            "future_frames_with_gt": int(gt_count),
+            "future_restart_requests_B0_ignored": int(restart_b0),
+            "future_restart_requests_B1_ignored": int(restart_b1),
+            "G_state_absrel_discounted": float(discounted_sum) if pair_count else float("nan"),
+            TARGET: float(discounted_sum / pair_count) if pair_count else float("nan"),
+            "mean_future_absrel_B0": finite_mean([r["absrel"] for r in rows_b0]),
+            "mean_future_absrel_B1": finite_mean([r["absrel"] for r in rows_b1]),
+            "mean_future_rmse_B0": finite_mean([r["rmse"] for r in rows_b0]),
+            "mean_future_rmse_B1": finite_mean([r["rmse"] for r in rows_b1]),
+            "mean_future_delta1_B0": finite_mean([r["delta1"] for r in rows_b0]),
+            "mean_future_delta1_B1": finite_mean([r["delta1"] for r in rows_b1]),
+            "future_protocol": "forced propagation; future restart requests logged but ignored; P1.5-compatible",
+            "positive_gain_means": "B1 persistent state writeback lowers discounted future AbsRel",
+        })
+        return result
+    finally:
+        # Crucial isolation guarantee: return the actual online trajectory to its
+        # exact pre-action state/runtime before the scheduled online action executes.
+        restore_state(model, state_before, pre_snapshot)
+
+
+def execute_logged_action(model, stream, inputs_reference, state, t, total_frames, row, scheduled_action):
+    """Replay the action recorded by v5.4, without recalculating its decision."""
+    requested = bool(row.get("scheduled_action_requested", False))
+    if t == 0:
+        out, state = stream.keyframe_step(clone_payload(inputs_reference), t, state, total_frames)
+        action = "initial_keyframe"
+        return out, state, action
+
+    if requested and scheduled_action == "state_writeback":
+        pre_state = cf.clone_state(state)
+        pre_snapshot = capture_state(model, pre_state)
+
+        propagated_state = cf.clone_state(pre_state)
+        restore_state(model, propagated_state, pre_snapshot)
+        out, propagated_state, restart = stream.propagate_step(
+            clone_payload(inputs_reference), t, propagated_state, total_frames
+        )
+        if restart:
+            out, state = stream.keyframe_step(
+                clone_payload(inputs_reference), t, propagated_state, total_frames
+            )
+            return out, state, "auto_restart"
+
+        post_prop_snapshot = capture_state(model, propagated_state)
+        refresh_state = cf.clone_state(pre_state)
+        restore_state(model, refresh_state, pre_snapshot)
+        _refresh_out, refresh_state = stream.keyframe_step(
+            clone_payload(inputs_reference), t, refresh_state, total_frames
+        )
+        cf.restore_runtime(model, post_prop_snapshot)
+        for field_name in cf.COMMIT_FIELDS:
+            value = getattr(refresh_state, field_name)
+            if value is None:
+                raise RuntimeError(f"Keyframe candidate field {field_name} is None at frame {t}")
+            setattr(propagated_state, field_name, cf.clone_payload(value))
+        return out, propagated_state, "state_writeback"
+
+    if requested:
+        state.first_keyframe = True
+        out, state = stream.keyframe_step(
+            clone_payload(inputs_reference), t, state, total_frames
+        )
+        state.fast_tail_radius = state.radius_teacher.detach().clone()
+        state.fast_tail_confidence = state.confidence_teacher.detach().clone()
+        state.fast_tail_features = [x.detach().clone() for x in state.features_teacher]
+        state.first_keyframe = False
+        return out, state, "policy_refresh"
+
+    out, state, restart = stream.propagate_step(
+        clone_payload(inputs_reference), t, state, total_frames
+    )
+    if restart:
+        out, state = stream.keyframe_step(
+            clone_payload(inputs_reference), t, state, total_frames
+        )
+        return out, state, "auto_restart"
+    return out, state, "propagation"
+
+
+def replay_trajectory_with_counterfactuals(
+    policy, model, base_snapshot, inputs, metas, frames, records, gt,
+    paddings, padded_shape, args, logged_rows, predictors
+):
+    """Replay one policy's recorded actions while evaluating same-state forks."""
+    inputs_reference = clone_payload(inputs)
+    total_frames = int(metas[0]["T"])
+    warmup_policy(model, base_snapshot, inputs_reference, total_frames)
+
+    state = StreamState()
+    restore_state(model, state, base_snapshot)
+    if "rays" in inputs_reference:
+        model.pixel_decoder.test_gt_camera = True
+    stream = VeloDepthStream(model)
+
+    anchor_rows = []
+    alignment_rows = []
+    actual_rows = []
+    for t, logged in enumerate(logged_rows):
+        if t >= args.frames:
+            break
+        is_candidate = (
+            t >= args.candidate_offset
+            and (t - args.candidate_offset) % args.candidate_stride == 0
+        )
+        full_horizon = t + args.horizon < total_frames
+        if is_candidate and full_horizon:
+            # Build features and scores from the exact pre-action state of this
+            # policy trajectory, not from a separately generated P2.2.2 trajectory.
+            features = build_online_features(
+                state, frames[t], frames[t - 1] if t > 0 else None
+            )
+            scores = {
+                name: predictor.predict(features)
+                for name, predictor in predictors.items()
+            }
+            pre_state_for_label = cf.clone_state(state)
+            cf_result = same_state_counterfactual(
+                model=model,
+                stream=stream,
+                inputs_reference=inputs_reference,
+                total_frames=total_frames,
+                anchor=t,
+                state_before=pre_state_for_label,
+                records=records,
+                gt=gt,
+                paddings=paddings,
+                padded_shape=padded_shape,
+                horizon=args.horizon,
+                gamma=args.gamma,
+            )
+            # same_state_counterfactual restores the actual online state/runtime.
+            item = {
+                "sequence": args.sequence,
+                "trajectory_policy": policy,
+                "anchor_frame": int(t),
+                "logged_action_at_anchor": str(logged.get("action", "")),
+                "scheduled_action_requested": bool(logged.get("scheduled_action_requested", False)),
+                "gt_available_at_anchor": bool(records[t]["gt_available"]),
+                "anchor_gt_time_diff_ms": (
+                    records[t]["time_diff"] * 1000.0
+                    if math.isfinite(records[t]["time_diff"]) else float("nan")
+                ),
+                "feature_scheduler_distance_kf": features.get("scheduler_distance_kf", float("nan")),
+                "feature_scheduler_flow_magnitude": features.get("scheduler_flow_magnitude", float("nan")),
+                "feature_scheduler_total_luma_change": features.get("scheduler_total_luma_change", float("nan")),
+                "feature_state_radius_teacher_mean": features.get("state_radius_teacher_mean", float("nan")),
+                "feature_state_confidence_teacher_mean": features.get("state_confidence_teacher_mean", float("nan")),
+                "feature_state_features_teacher_0_mean": features.get("state_features_teacher_0_mean", float("nan")),
+                "feature_state_features_teacher_1_mean": features.get("state_features_teacher_1_mean", float("nan")),
+                "feature_state_features_teacher_2_mean": features.get("state_features_teacher_2_mean", float("nan")),
+                "feature_state_features_teacher_3_mean": features.get("state_features_teacher_3_mean", float("nan")),
+                "score_state_only": scores.get("causal_budget_state_only", float("nan")),
+                "score_motion_plus_learned": scores.get("causal_budget_motion_plus_learned", float("nan")),
+            }
+            item.update(cf_result)
+            anchor_rows.append(item)
+
+        # Replay the actual logged action after the counterfactual fork. This action
+        # is the same action chosen by the first v5.4 replay; no label enters policy.
+        sync_cuda()
+        out, state, replayed_action = execute_logged_action(
+            model, stream, inputs_reference, state, t, total_frames, logged,
+            args.scheduled_action
+        )
+        m = cf.eval_output(out, model, paddings, padded_shape, gt[t])
+        logged_absrel = float(logged.get("absrel", float("nan")))
+        replay_absrel = float(m.get("absrel", float("nan")))
+        absrel_diff = (
+            replay_absrel - logged_absrel
+            if math.isfinite(replay_absrel) and math.isfinite(logged_absrel)
+            else float("nan")
+        )
+        logged_action = str(logged.get("action", ""))
+        alignment_rows.append({
+            "sequence": args.sequence,
+            "policy": policy,
+            "frame_index": int(t),
+            "logged_action": logged_action,
+            "replayed_action": replayed_action,
+            "action_match": bool(logged_action == replayed_action),
+            "logged_absrel": logged_absrel,
+            "replayed_absrel": replay_absrel,
+            "absrel_diff_replayed_minus_logged": absrel_diff,
+            "logged_gt_available": bool(logged.get("gt_available", False)),
+            "replayed_gt_available": bool(records[t]["gt_available"]),
+        })
+        actual_rows.append({
+            "sequence": args.sequence,
+            "policy": policy,
+            "frame_index": int(t),
+            "action": replayed_action,
+            "absrel": replay_absrel,
+            "rmse": m.get("rmse", float("nan")),
+            "delta1": m.get("delta1", float("nan")),
+            "valid_ratio": m.get("valid_ratio", float("nan")),
+        })
+    return anchor_rows, alignment_rows, actual_rows
+
+
+def make_diagnostics(anchor_rows):
+    rows = []
+    df = pd.DataFrame(anchor_rows)
+    if df.empty:
+        return rows
+    for (seq, trajectory), sub in df.groupby(["sequence", "trajectory_policy"], dropna=False):
+        for predictor_name, score_col in [
+            ("causal_budget_state_only", "score_state_only"),
+            ("causal_budget_motion_plus_learned", "score_motion_plus_learned"),
+        ]:
+            valid = sub[
+                np.isfinite(pd.to_numeric(sub[score_col], errors="coerce"))
+                & np.isfinite(pd.to_numeric(sub[TARGET], errors="coerce"))
+                & (sub["status"].astype(str) == "ok")
+            ].copy()
+            n = len(valid)
+            if n:
+                scores = pd.to_numeric(valid[score_col], errors="coerce").to_numpy(float)
+                targets = pd.to_numeric(valid[TARGET], errors="coerce").to_numpy(float)
+                pearson = float(pd.Series(scores).corr(pd.Series(targets), method="pearson")) if n >= 2 else float("nan")
+                spearman = float(pd.Series(scores).corr(pd.Series(targets), method="spearman")) if n >= 2 else float("nan")
+                top_n = max(1, int(math.ceil(0.25 * n)))
+                order = np.argsort(scores)[::-1]
+                top_targets = targets[order[:top_n]]
+                overall_mean = float(np.mean(targets))
+                selected_mean = float(np.mean(top_targets))
+                top_positive = float(np.mean(top_targets > 0))
+                overall_positive = float(np.mean(targets > 0))
+                lift = selected_mean - overall_mean
+                positive_rate_lift = top_positive - overall_positive
+            else:
+                pearson = spearman = overall_mean = selected_mean = lift = float("nan")
+                top_n = 0
+                top_positive = overall_positive = positive_rate_lift = float("nan")
+            rows.append({
+                "sequence": seq,
+                "trajectory_policy": trajectory,
+                "predictor": predictor_name,
+                "valid_anchor_count": int(n),
+                "pearson_score_vs_same_state_gain": pearson,
+                "spearman_score_vs_same_state_gain": spearman,
+                "mean_gain_all_anchors": overall_mean,
+                "mean_gain_top_score_quartile": selected_mean,
+                "top_quartile_gain_lift": lift,
+                "positive_gain_rate_all": overall_positive,
+                "positive_gain_rate_top_quartile": top_positive,
+                "positive_gain_rate_lift": positive_rate_lift,
+                "top_quartile_n": int(top_n),
+                "target_definition": TARGET,
+            })
+    return rows
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        description="P2.3 v5.5 same-state counterfactual gain diagnostics"
+    )
+    ap.add_argument("--data-root", required=True)
+    ap.add_argument("--sequence", choices=("crowd2", "balloon2", "crowd3"), required=True)
+    ap.add_argument("--frames", type=int, default=32)
+    ap.add_argument("--train-dataset", default="outputs/p2_2_2/p2_2_2_valid_dataset.csv")
+    ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--horizon", type=int, default=16)
+    ap.add_argument("--gamma", type=float, default=0.9)
+    ap.add_argument("--max-time-diff", type=float, default=0.02)
+    ap.add_argument("--gt-scale", type=float, default=5000.0)
+    ap.add_argument("--resolution-level", type=int, default=0)
+    ap.add_argument("--candidate-stride", type=int, default=4)
+    ap.add_argument("--candidate-offset", type=int, default=1)
+    ap.add_argument("--min-refresh-gap", type=int, default=4)
+    ap.add_argument("--fixed-interval", type=int, default=8)
+    ap.add_argument("--budget-actions", type=int, default=8)
+    ap.add_argument("--ridge-alpha", type=float, default=10.0)
+    ap.add_argument("--target-refresh-fraction", type=float, default=3.0 / 7.0)
+    ap.add_argument("--policies", default="auto,budget_fixed,causal_budget_state_only,causal_budget_motion_plus_learned")
+    args = ap.parse_args()
+
+    if args.frames <= args.horizon + args.candidate_offset:
+        ap.error("frames must exceed horizon + candidate offset to provide a full future window")
+    if args.horizon != 16:
+        ap.error("P2.3 v5.5 currently fixes H=16 to match the project's primary target")
+    if not (0 < args.gamma <= 1):
+        ap.error("--gamma must be in (0,1]")
+    if args.candidate_stride < args.min_refresh_gap:
+        ap.error("candidate-stride must be >= min-refresh-gap for budget controller compatibility")
+    policies = [p.strip() for p in args.policies.split(",") if p.strip()]
+    if policies != [p for p in POLICIES if p in policies] or set(policies) - set(POLICIES):
+        ap.error(f"--policies must be an ordered subset of {POLICIES}")
+    if not set(PREDICTOR_NAMES).issubset(policies):
+        ap.error("Both causal predictor policies must be included to produce same-state score diagnostics")
+
+    fixed_frames, eligible_frames = make_fixed_budget_frames(
+        args.frames, args.candidate_offset, args.candidate_stride,
+        args.min_refresh_gap, args.budget_actions
+    )
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA is not available. Run on the AutoDL GPU instance, not the no-card instance.")
+
+    root = Path(args.data_root)
+    rgb_index = cf.read_index(root, "rgb.txt", "rgb")
+    depth_index = cf.read_index(root, "depth.txt", "depth")
+    selected = rgb_index[:args.frames]
+    if len(selected) != args.frames:
+        raise RuntimeError(f"Requested {args.frames} RGB frames but found {len(selected)} in {root}")
+    records = match_gt_tolerant(selected, depth_index, args.max_time_diff)
+    frames = cf.load_frames(records)
+    gt = [
+        cf.load_gt(r["gt_path"], args.gt_scale) if r["gt_available"] else None
+        for r in records
+    ]
+    matched = sum(bool(r["gt_available"]) for r in records)
+    print(f"Sequence={args.sequence}; frames={len(frames)}; GT matches={matched}/{len(records)}")
+
+    torch.set_grad_enabled(False)
+    print("Loading frozen VeloDepth weights...")
+    model = VeloDepth.from_pretrained("lpiccinelli/velodepth")
+    model.to(torch.device("cuda"))
+    model.eval()
+    model.resolution_level = args.resolution_level
+    model.interpolation_mode = "bilinear"
+
+    print("Capturing packed inputs/flow; aborting neural inference at encode_decode_test boundary...")
+    inputs, metas = capture_packed_inputs_without_full_inference(model, frames)
+    total_frames = int(metas[0]["T"])
+    if total_frames != args.frames:
+        raise RuntimeError(f"Packed frame count {total_frames} != requested {args.frames}")
+    H, W = int(frames.shape[-2]), int(frames.shape[-1])
+    paddings, (padded_h, padded_w) = replay.get_paddings(
+        (H, W), model.shape_constraints["ratio_bounds"]
+    )
+    padded_shape = (padded_h, padded_w)
+    base_snapshot = capture_state(model, StreamState())
+    if "rays" in inputs:
+        model.pixel_decoder.test_gt_camera = True
+
+    predictors = {}
+    for name in PREDICTOR_NAMES:
+        predictors[name] = OnlineRidge(
+            args.train_dataset, args.sequence, name,
+            horizon=args.horizon, alpha=args.ridge_alpha,
+            target_refresh_fraction=args.target_refresh_fraction,
+        )
+        p = predictors[name]
+        print(
+            f"Predictor {name}: train_n={p.train_n}; OOF_n={p.oof_n}; "
+            f"threshold={p.calibrated_threshold:.8f}; OOF_rate={p.oof_achieved_fraction:.3f}"
+        )
+
+    # Namespace fields consumed by the existing v5.4 replay harness.
+    replay_args = argparse.Namespace(
+        sequence=args.sequence,
+        frames=args.frames,
+        fixed_interval=args.fixed_interval,
+        min_refresh_gap=args.min_refresh_gap,
+        candidate_stride=args.candidate_stride,
+        candidate_offset=args.candidate_offset,
+        allowed_action_frame_set=None,
+        forced_action_frame_set=set(),
+        scheduled_action="state_writeback",
+        threshold_mode="train_oof_budget",
+        threshold=0.0,
+        target_refresh_fraction=args.target_refresh_fraction,
+        horizon=args.horizon,
+        ridge_alpha=args.ridge_alpha,
+        budget_actions=args.budget_actions,
+        fixed_budget_frame_set=fixed_frames,
+        gamma=args.gamma,
+    )
+
+    out_dir = Path(args.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    all_anchor_rows, all_alignment_rows, all_policy_rows, all_policy_summaries = [], [], [], []
+    calibration_rows, calibration_fold_rows = [], []
+
+    for policy in policies:
+        predictor = predictors.get(policy)
+        print(f"\n===== P2.3 v5.5 ONLINE TRAJECTORY: {policy} =====")
+        logged_rows = replay.run_policy(
+            policy, model, base_snapshot, inputs, metas, frames, records, gt,
+            paddings, padded_shape, args.sequence, replay_args, predictor
+        )
+        all_policy_rows.extend(logged_rows)
+        all_policy_summaries.extend(summarize(logged_rows))
+        if predictor is not None:
+            calibration_rows.extend(predictor.oof_rows)
+            calibration_fold_rows.extend(predictor.fold_rows)
+
+        print(f"===== P2.3 v5.5 SAME-STATE COUNTERFACTUALS: {policy} =====")
+        anchors, alignment, actual = replay_trajectory_with_counterfactuals(
+            policy, model, base_snapshot, inputs, metas, frames, records, gt,
+            paddings, padded_shape, replay_args, logged_rows, predictors
+        )
+        all_anchor_rows.extend(anchors)
+        all_alignment_rows.extend(alignment)
+        all_policy_rows.extend([])
+
+        action_mismatches = sum(not r["action_match"] for r in alignment)
+        finite_diffs = [
+            abs(float(r["absrel_diff_replayed_minus_logged"]))
+            for r in alignment if math.isfinite(float(r["absrel_diff_replayed_minus_logged"]))
+        ]
+        max_absrel_diff = max(finite_diffs) if finite_diffs else float("nan")
+        print(
+            f"ALIGNMENT {policy}: action_mismatches={action_mismatches}/{len(alignment)}; "
+            f"max_absrel_diff={max_absrel_diff:.8g}"
+        )
+
+    diagnostics = make_diagnostics(all_anchor_rows)
+    frame_csv = out_dir / "p2_3_v5_5_online_frame_metrics.csv"
+    summary_csv = out_dir / "p2_3_v5_5_policy_summary.csv"
+    anchor_csv = out_dir / "p2_3_v5_5_same_state_anchor_labels.csv"
+    diagnostic_csv = out_dir / "p2_3_v5_5_gain_diagnostics.csv"
+    alignment_csv = out_dir / "p2_3_v5_5_trajectory_alignment.csv"
+    calibration_csv = out_dir / "p2_3_v5_5_threshold_calibration_oof.csv"
+    calibration_folds_csv = out_dir / "p2_3_v5_5_threshold_calibration_folds.csv"
+    metadata_json = out_dir / "p2_3_v5_5_metadata.json"
+
+    write_csv(frame_csv, all_policy_rows)
+    write_csv(summary_csv, all_policy_summaries)
+    write_csv(anchor_csv, all_anchor_rows)
+    write_csv(diagnostic_csv, diagnostics)
+    write_csv(alignment_csv, all_alignment_rows)
+    write_csv(calibration_csv, calibration_rows)
+    write_csv(calibration_folds_csv, calibration_fold_rows)
+
+    metadata = {
+        "experiment": "P2.3 v5.5 same-state counterfactual gain diagnosis",
+        "sequence": args.sequence,
+        "data_root": str(root),
+        "frames": int(args.frames),
+        "gt_matches": int(matched),
+        "horizon_H": int(args.horizon),
+        "gamma": float(args.gamma),
+        "target": TARGET,
+        "positive_target_means": "B1 persistent geometry state writeback reduces discounted future AbsRel relative to B0 propagation",
+        "model_weights_frozen": True,
+        "predictor_training": "Ridge predictors trained on P2.2.2 H=16 rows from the other two sequences; VeloDepth weights are not trained",
+        "state_alignment": "At each candidate anchor, save the pre-action state from the exact policy trajectory; fork B0 and B1 from that same state snapshot; restore the actual trajectory before executing its logged action",
+        "B0": "propagate at anchor; no persistent geometry fields written back",
+        "B1": "propagate at anchor and retain its output; compute full keyframe candidate from same pre-action snapshot; commit only COMMIT_FIELDS",
+        "B1_commit_fields": list(cf.COMMIT_FIELDS),
+        "future_protocol": "P1.5-compatible forced propagation for H=16; future restart requests are recorded but not executed; anchor restart requests cause anchor skip",
+        "target_formula": "sum_{k=1..H, finite paired AbsRel} gamma**k*(AbsRel_B0[k]-AbsRel_B1[k]) / number_of_finite_metric_pairs; missing pairs do not renumber discount exponent",
+        "diagnostic_only_future_labels": True,
+        "future_labels_enter_online_action_decisions": False,
+        "same_state_labels_are_per_policy_trajectory": True,
+        "policies": policies,
+        "pre_specified_budget_K": int(args.budget_actions),
+        "budget_fixed_scheduled_frames": sorted(int(x) for x in fixed_frames),
+        "eligible_budget_anchors": [int(x) for x in eligible_frames],
+        "candidate_stride": int(args.candidate_stride),
+        "candidate_offset_zero_based": int(args.candidate_offset),
+        "min_refresh_gap": int(args.min_refresh_gap),
+        "trajectory_replay_validation": "action sequence and frame AbsRel are compared against original v5.4 replay; inspect trajectory_alignment CSV before interpreting labels",
+        "timing_scope": "diagnostic branch replay is not a latency benchmark and does not claim compute savings",
+        "outputs": {
+            "online_frame_metrics": str(frame_csv),
+            "policy_summary": str(summary_csv),
+            "same_state_anchor_labels": str(anchor_csv),
+            "gain_diagnostics": str(diagnostic_csv),
+            "trajectory_alignment": str(alignment_csv),
+            "threshold_calibration_oof": str(calibration_csv),
+            "threshold_calibration_folds": str(calibration_folds_csv),
+        },
+    }
+    metadata_json.write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    print("\n===== P2.3 v5.5 POLICY SUMMARY =====")
+    print(pd.DataFrame(all_policy_summaries)[[
+        "policy", "frames_with_valid_metrics", "mean_absrel", "mean_rmse",
+        "mean_delta1", "state_writeback_count", "auto_restart_count",
+        "mean_model_action_ms", "mean_decision_ms"
+    ]].to_string(index=False))
+    print("\n===== P2.3 v5.5 SAME-STATE GAIN DIAGNOSTICS =====")
+    if diagnostics:
+        print(pd.DataFrame(diagnostics)[[
+            "trajectory_policy", "predictor", "valid_anchor_count",
+            "pearson_score_vs_same_state_gain", "spearman_score_vs_same_state_gain",
+            "top_quartile_gain_lift", "positive_gain_rate_lift"
+        ]].to_string(index=False))
+    print("\nWrote:", frame_csv)
+    print("Wrote:", summary_csv)
+    print("Wrote:", anchor_csv)
+    print("Wrote:", diagnostic_csv)
+    print("Wrote:", alignment_csv)
+    print("Wrote:", metadata_json)
+    print("IMPORTANT: verify trajectory_alignment.csv; no model weights were updated.")
+
+
+if __name__ == "__main__":
+    main()

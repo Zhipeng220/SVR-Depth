@@ -1,0 +1,1 @@
+{"method":"output_feature","implementation_status":"not_implemented","description":"O_multi requires independent training and native-state-only writeback."}

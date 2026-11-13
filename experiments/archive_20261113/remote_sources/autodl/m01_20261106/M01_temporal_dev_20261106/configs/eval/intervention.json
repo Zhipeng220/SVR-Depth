@@ -1,0 +1,7 @@
+{
+  "protocol": "intervention",
+  "refresh_interval": 16,
+  "anchor_ages": [1, 4, 8],
+  "horizon": 4,
+  "implementation_status": "historical_compatibility_runner"
+}

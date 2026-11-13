@@ -1,0 +1,44 @@
+--- eng04_rollout.py
++++ eng05_rollout.py
+@@ -2,9 +2,9 @@
+ from pathlib import Path
+ os.environ['CUDA_VISIBLE_DEVICES']='0';os.environ.setdefault('OMP_NUM_THREADS','1')
+ import numpy as np,torch,cv2
+-ROOT=Path('/home/svrdepth/SVR-Depth/velodepth');OUT=ROOT/'outputs/p5norm_eng04_layer_marginal_ablation';sys.path[:0]=[str(ROOT),str(ROOT/'experiments/p1'),str(OUT)]
++ROOT=Path('/home/svrdepth/SVR-Depth/velodepth');OUT=ROOT/'outputs/p5norm_eng05_factorial_screening';sys.path[:0]=[str(ROOT),str(ROOT/'experiments/p1'),str(OUT)]
+ import gt2_fixed_clip_repair_train as gt2,gt4a2_exp1_train_eval as exp1,cvpr_m05_formal as m05
+-from eng04_policy import build_policy_state
++from eng05_policy import build_policy_state
+ policy=sys.argv[1];dest=OUT/policy;dest.mkdir(exist_ok=False);status={'policy':policy,'status':'FAIL'};trace=[];metrics=[];nonfeatures=[];start=time.monotonic()
+ try:
+  random.seed(20261025);np.random.seed(20261025);torch.manual_seed(20261025);torch.cuda.manual_seed_all(20261025);dev=torch.device('cuda:0');torch.cuda.reset_peak_memory_stats();print('PRE_MODEL_CUDA allocated',torch.cuda.memory_allocated(),'reserved',torch.cuda.memory_reserved(),flush=True);snap=Path.home()/'hf_cache/hub/models--lpiccinelli--velodepth/snapshots/2b2ee9fe44d0b261e736653042cecd7693f99c8c';model=gt2.load_model(snap,'pre_readout',dev);ck=torch.load(ROOT/'outputs/y04_v5_preserve_seed20261025_20261109_112607/final.pt',map_location='cpu',weights_only=False);model.pixel_decoder.persistent_feature_repair.load_state_dict(ck['repair_head_state_dict'],strict=True);del ck;model.eval()
+@@ -21,7 +21,7 @@
+  def hook(mod,inp,out):capt.append(([x.detach().clone() for x in inp[0]],[x.detach().clone() for x in out],[x.untyped_storage().data_ptr() for x in inp[0]],[x.untyped_storage().data_ptr() for x in out]))
+  def profile(frame,event,arg):
+   if event=='call' and frame.f_code is gt2.fast_step.__code__:f=frame.f_locals['features_state'];reads.append(([x.detach().clone() for x in f],[x.untyped_storage().data_ptr() for x in f]))
+- handle=model.pixel_decoder.persistent_feature_repair.register_forward_hook(hook);previous_selected=None;steps=int(os.environ.get('ENG02_STEPS','8'));assert steps in (8,9)
++ handle=model.pixel_decoder.persistent_feature_repair.register_forward_hook(hook);previous_selected=None;previous_sources=None;steps=int(os.environ.get('ENG02_STEPS','8'));assert steps in (8,9)
+  with torch.inference_mode():
+   for i in range(2,2+steps):
+    current=exp1.load_frame(data[i],shape,dev,need_gt=False);assert float(data[i]['rgb_timestamp'])>float(data[i-1]['rgb_timestamp']);static=exp1.transition_static(model,previous,current,shape,dis);capt.clear();reads.clear();nonfeature_input={k:state[k].detach().clone() for k in ['radius','confidence','rays_map']};sys.setprofile(profile)
+@@ -31,6 +31,8 @@
+    for k in ['radius','confidence','rays_map']:
+     a=nonfeature_input[k];b=native[k];assert a.shape==b.shape and torch.isfinite(a).all() and torch.isfinite(b).all();delta=(b.float()-a.float());nonfeatures.append(dict(policy=policy,step_index=i-1,field=k,shape=str(tuple(a.shape)),dtype=str(a.dtype),device=str(a.device),input_min=float(a.min()),input_max=float(a.max()),input_mean=float(a.float().mean()),output_min=float(b.min()),output_max=float(b.max()),output_mean=float(b.float().mean()),max_abs_difference=float(delta.abs().max()),l2_difference=float(torch.linalg.vector_norm(delta.reshape(-1))),input_finite=bool(torch.isfinite(a).all()),output_finite=bool(torch.isfinite(b).all())))
+    if previous_selected is not None:
++    if not all(torch.equal(a,b) for a,b in zip(state['features'],previous_selected)):raise RuntimeError('input state mutated')
++    if not all(torch.equal(a,b) for a,b in zip(previous_sources[0],previous_sources[1])):raise RuntimeError('source mutated')
+     for l,(a,b) in enumerate(zip(previous_selected,reads[0][0])):
+      if not torch.equal(a,b):raise RuntimeError('next read mismatch')
+      trace[-4+l]['consumed_feature_storage']=reads[0][1][l];trace[-4+l]['next_read_equal']='True'
+@@ -43,9 +45,9 @@
+      if not np.allclose(first,prediction,rtol=1e-5,atol=1e-5):raise RuntimeError('first prediction mismatch')
+     else:np.save(refpred,prediction)
+    if i<=9:
+-    choice=build_policy_state(native,s0,s1,policy);selected=[x.clone() for x in choice['features']];previous_selected=selected
++    choice=build_policy_state(native,s0,s1,policy);previous_sources=(s0+s1,[x.clone() for x in s0+s1]);selected=[x.clone() for x in choice['features']];previous_selected=selected
+     for l in range(4):
+-     expected=s0[l] if policy=='NO_L'+str(l+1) else s1[l];err=float((choice['features'][l]-expected).abs().max());update=float(torch.linalg.vector_norm((s1[l]-s0[l]).float().reshape(-1)));state_change=float(torch.linalg.vector_norm((choice['features'][l]-reads[0][0][l]).float().reshape(-1)));assert err==0
++     expected=s1[l] if policy[l]=='1' else s0[l];err=float((choice['features'][l]-expected).abs().max());update=float(torch.linalg.vector_norm((s1[l]-s0[l]).float().reshape(-1)));state_change=float(torch.linalg.vector_norm((choice['features'][l]-reads[0][0][l]).float().reshape(-1)));assert err==0
+      trace.append(dict(policy=policy,step_index=i-1,current_frame=Path(data[i]['rgb_path']).name,next_frame=Path(data[i+1]['rgb_path']).name,timestamp=data[i]['rgb_timestamp'],layer=l+1,expected='S1' if expected is s1[l] else 'S0',repair_hook_count=len(capt),input_feature_storage=reads[0][1][l],s0_storage=p0[l],s1_storage=p1[l],selected_feature_storage=choice['features'][l].untyped_storage().data_ptr(),consumed_feature_storage='',shape=str(tuple(expected.shape)),dtype=str(expected.dtype),device=str(expected.device),max_absolute_difference=err,update_l2=update,state_change_l2=state_change,finite=bool(torch.isfinite(expected).all()),next_read_equal='NOT_OBSERVED'))
+     pred=m05.make_prediction(model,gt2,native,shape);assert np.isfinite(pred).all() and (pred>0).all();gt=exp1.load_frame(data[i],shape,dev,need_gt=True)['gt_np'];m=gt2.calculate_metrics(gt,pred);metrics.append(dict(policy=policy,step_index=i-1,frame=Path(data[i]['rgb_path']).name,AbsRel=m['AbsRel'],RMSE=m['RMSE'],valid_pixels=m['valid_pixels']));state=choice
+    previous=current

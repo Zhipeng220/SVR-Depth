@@ -1,0 +1,8 @@
+{
+  "format": "bonn_raw_paired_csv",
+  "data_root": null,
+  "pair_manifest": null,
+  "depth_scale": 5000.0,
+  "max_rgb_depth_delta_ms": 20.0,
+  "note": "Example of the existing raw-data protocol; verify the dataset encoding and registration. Paths are supplied per machine."
+}

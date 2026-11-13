@@ -1,0 +1,27 @@
+{
+  "protocol": "M01_Bonn_TUM_K16_raw",
+  "refresh_interval": 16,
+  "gain": 1,
+  "frequency": 1,
+  "snapshot": {
+    "path": "/EDIT/velodepth-snapshot",
+    "config_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "weights_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "methods": [
+    {"method": "A", "seed": "native"},
+    {"method": "P_multi", "seed": "20261103", "checkpoint": "/EDIT/P_multi_checkpoint.pt", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "state_key": "head_state"},
+    {"method": "O_fast", "seed": "20261103", "checkpoint": "/EDIT/O_fast_checkpoint.pt", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "state_key": "adapter_state_dict"},
+    {"method": "O_multi", "seed": "20261103", "checkpoint": "/EDIT/O_multi_checkpoint.pt", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "state_key": "adapter_state_dict"}
+  ],
+  "sequences": [
+    {"dataset": "Bonn", "sequence": "EDIT_BONN_SEQUENCE", "scene": "EDIT_PHYSICAL_SCENE", "pairs_csv": "/EDIT/bonn_pairs.csv", "depth_scale": 1000, "min_depth_m": 0.001, "max_depth_m": 10.0, "max_delta_ms": 20},
+    {"dataset": "TUM", "sequence": "EDIT_EXACT_HDF5_SEQUENCE_NAME", "scene": "EDIT_PHYSICAL_SCENE", "hdf5": "/EDIT/TUM.hdf5", "split_key": "val.txt", "depth_scale": 1000, "min_depth_m": 0.001, "max_depth_m": 10.0}
+  ],
+  "save_predictions": true,
+  "compute_ssi": false,
+  "hash_hdf5_content": false,
+  "bootstrap_samples": 2000,
+  "timing_repeats": 3,
+  "timing_warmup_frames": 16
+}

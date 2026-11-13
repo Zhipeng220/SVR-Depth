@@ -1,0 +1,128 @@
+{
+  "version": "Y00-1.0",
+  "snapshot": "/home/svrdepth/hf_cache/hub/models--lpiccinelli--velodepth/snapshots/2b2ee9fe44d0b261e736653042cecd7693f99c8c",
+  "scene_manifest": "FILL_SCENE_MANIFEST_CSV",
+  "legacy_pairs": {
+    "crowd2": "outputs/gt4a2_exp1/gt4a2_exp1_crowd2_pairs_used.csv",
+    "crowd3": "outputs/gt4a2_exp1/gt4a2_exp1_crowd3_pairs_used.csv",
+    "balloon2": "outputs/gt4a2_exp1/gt4a2_exp1_balloon2_pairs_used.csv"
+  },
+  "artifacts": [
+    {
+      "id": "y02a_script",
+      "kind": "script",
+      "path": "experiments/p1/gt4a2_y02a_cross_method_oracle.py",
+      "expected_sha256": "575bc8bdf48027fc54b898975cc1737da17cf34d40bbdb8832424f32862dd521"
+    },
+    {
+      "id": "y04a_script",
+      "kind": "script",
+      "path": "experiments/p1/gt4a2_y04a_native_pre_readout_eval.py",
+      "expected_sha256": "6fbe1a2464a7f9756f9ea68cf05f3476a89b005b8e6f889dd1a0093f231c3116"
+    },
+    {
+      "id": "y07w_script",
+      "kind": "script",
+      "path": "experiments/p1/gt4a2_y07w_same_head_no_writeback.py",
+      "expected_sha256": "e3ef2dae3bc387ddb9f9e11828d266bb14aaab9be1b17b9390666a8ac38ad358"
+    },
+    {
+      "id": "p_weights",
+      "kind": "weights",
+      "path": "outputs/gt4a2_y04_validation_fix3_20261025_225902/training/P_multi/gt4a2_c3_C_final_step1000.pt",
+      "expected_sha256": "77a86cdf523f776608b6b591d6c6552002b90398e85d00d3a3fe29afe14a0a24"
+    },
+    {
+      "id": "o_weights",
+      "kind": "weights",
+      "path": "outputs/gt4a2_y04_validation_fix3_20261025_225902/training/O_multi/Y04_O_multi_final_step1000.pt"
+    },
+    {
+      "id": "o_method_script",
+      "kind": "script",
+      "path": "experiments/p1/gt4a2_y04_fair_multiscene.py",
+      "expected_sha256": "2a24e5a67487d55177e3374f9c6be5e92795b508dfcdb299cefe46e37cc31d4f"
+    },
+    {
+      "id": "overlap_evidence",
+      "kind": "evidence",
+      "path": "FILL_OVERLAP_EVIDENCE_PATH"
+    },
+    {
+      "id": "source_0",
+      "kind": "script",
+      "path": "experiments/p1/gt4a2_exp1_train_eval.py",
+      "expected_sha256": "c24441cb405465c1a16a86127b51aade8f9af69b5d368f43d830d0e759ee3d7f"
+    },
+    {
+      "id": "source_1",
+      "kind": "script",
+      "path": "experiments/p1/gt2_fixed_clip_repair_train.py",
+      "expected_sha256": "bf7cd2021b1d0bbf66d75502dba6afed87f4c8ff3ef58ff7b18f56ac28044192"
+    },
+    {
+      "id": "source_2",
+      "kind": "script",
+      "path": "velodepth/models/decoder_velo.py",
+      "expected_sha256": "35ca12629accd1a2a77595f505165fa17dffab07c763a8b639604285b94bdb08"
+    },
+    {
+      "id": "source_3",
+      "kind": "script",
+      "path": "velodepth/models/persistent_feature_repair.py",
+      "expected_sha256": "6dfc8b0c5565ea9139b8c266c5ef337b3309ce0fde2f365428fc44390b84117c"
+    },
+    {
+      "id": "source_4",
+      "kind": "script",
+      "path": "velodepth/models/velodepth.py",
+      "expected_sha256": "739c5f27a749174987b9a36edaac32fb98070e87dbef0a0a52f7430d61149479"
+    },
+    {
+      "id": "source_5",
+      "kind": "script",
+      "path": "velodepth/models/encoder_velo.py",
+      "expected_sha256": "3c5aa2a3a6dce03b68373953037fe8a0313a2cab36d66e5e3b88a56ec4a7ba8a"
+    }
+  ],
+  "methods": {
+    "A": {
+      "artifacts": [
+        "source_4",
+        "source_5"
+      ],
+      "contract": "FILL_A_STATE_CONTRACT"
+    },
+    "O": {
+      "artifacts": [
+        "o_weights",
+        "o_method_script"
+      ],
+      "contract": "FILL_O_STATE_AND_READOUT_CONTRACT"
+    },
+    "P": {
+      "artifacts": [
+        "p_weights",
+        "y04a_script"
+      ],
+      "contract": "FILL_P_STATE_AND_READOUT_CONTRACT"
+    },
+    "N": {
+      "artifacts": [
+        "p_weights",
+        "y07w_script"
+      ],
+      "contract": "FILL_N_STATE_AND_READOUT_CONTRACT"
+    }
+  },
+  "timing_boundary": "FILL_TIMING_INCLUDED_EXCLUDED_WARMUP_DEVICE_AND_SYNCHRONIZATION",
+  "selection_budget": "FILL_DEV_GAIN_CHECKPOINT_K_SELECTION_BUDGET_AND_FINAL_TEST_RULE",
+  "seeds": "FILL_EXISTING_AND_PLANNED_SEEDS",
+  "dataset_provenance": "FILL_SCENE_ID_MAPPING_DATASET_VERSION_AND_PROJECT_OVERLAP_CHECK",
+  "base_training_overlap": {
+    "status": "unknown",
+    "evidence_artifact": "overlap_evidence",
+    "notes": "FILL_VERIFIED_NO_OVERLAP_OR_UNCERTAIN_WITH_EVIDENCE"
+  },
+  "allow_uncertain_base_overlap": false
+}

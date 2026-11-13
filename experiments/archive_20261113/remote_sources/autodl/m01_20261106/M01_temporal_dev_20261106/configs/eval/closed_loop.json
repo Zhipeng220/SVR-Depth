@@ -1,0 +1,6 @@
+{
+  "protocol": "closed_loop",
+  "refresh_interval": 16,
+  "branches": ["A_off", "O_same_head", "F_only", "P_full"],
+  "implementation_status": "historical_compatibility_runner"
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "source": "wsl/mnt_d_SVR-Depth_SVR-Depth/SVR-Depth/github仓库/Velodepth-main/Velodepth-main/velodepth/models/additionals/searaft/utils/flow_transforms.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/505527782a4acf76f0713131/flow_transforms.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/SVR_Depth_E0_state_contract_audit/SVR_Depth_E0_package/experiments/state_repair/e0_state_contract_audit.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/9ed15baf777d6f90aa9fdcfd/e0_state_contract_audit.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/outputs/gt2_validation/gt2_fixed_clip_repair_train.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/55bff2bc7638edd4ae24a0bb/gt2_fixed_clip_repair_train.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/outputs/gt2_validation/GT2_execution_bundle_unpacked/gt2_fixed_clip_repair_train.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/aba4be8478dddcae8b3c2e01/gt2_fixed_clip_repair_train.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_online_replay_v5_10_external.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/88cd098806cfb3983cd4a6a9/p2_3_online_replay_v5_10_external.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_online_replay_v5_11_action_audit.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/4167b79ee065bd472f822f61/p2_3_online_replay_v5_11_action_audit.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_online_replay_v5_1_writeback_gtmask.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/6cf659be734308a97d4bcf2b/p2_3_online_replay_v5_1_writeback_gtmask.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_online_replay_v5_2_budget_rank.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/ee742c7803b1d02d626b0a0b/p2_3_online_replay_v5_2_budget_rank.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_online_replay_v5_3_causal_budget.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/53a207411ebbd67ac9639a00/p2_3_online_replay_v5_3_causal_budget.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_online_replay_v5_4_budget_sweep.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/0459714178c05c5e9f19cbc3/p2_3_online_replay_v5_4_budget_sweep.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_online_replay_v5_7_equal_budget.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/a82c6780f3f78465edc79be3/p2_3_online_replay_v5_7_equal_budget.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_online_replay_v5_8_temporal_budget.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/fe5968d442cc598eccd2b159/p2_3_online_replay_v5_8_temporal_budget.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_v5_12_gain_rank_budget_audit.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/eb73aaeea8c767f01bc4dfb4/p2_3_v5_12_gain_rank_budget_audit.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_v5_13_label_feature_stability_audit.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/cf0e6729892e08c0eda37eef/p2_3_v5_13_label_feature_stability_audit.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_v5_26b_long_interval_refresh.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/612b06df278220cbbe3f4ec3/p2_3_v5_26b_long_interval_refresh.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_v5_26c_multiwindow_refresh_gain.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/69a770bd491fe310141c9a46/p2_3_v5_26c_multiwindow_refresh_gain.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_v5_26d_encoder_decoder_bias_audit.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/b0d47a1a83abced275fb3682/p2_3_v5_26d_encoder_decoder_bias_audit.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_v5_26e_global_token_spatial_feature_ablation.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/540509a9d99e4f4e69383452/p2_3_v5_26e_global_token_spatial_feature_ablation.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_v5_26f_historical_feature_reuse_audit.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/9d766e0824d49e9ecc10542e/p2_3_v5_26f_historical_feature_reuse_audit.py"
+  },
+  {
+    "source": "wsl/home_svrdepth_SVR-Depth/velodepth/outputs/e0_c3_audit_20261024_215510/review_payload/experiments/p1/p2_3_v5_26g_motion_compensated_feature_reuse.py",
+    "destination": "experiments/archive_20261113/remote_sources/_longpaths/wsl/fe6c5cb6529cf930926121bc/p2_3_v5_26g_motion_compensated_feature_reuse.py"
+  }
+]

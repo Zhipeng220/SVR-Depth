@@ -1,0 +1,42 @@
+{
+  "protocol": "M05-V3.1-dev",
+  "source": "SVR-Depth CVPR主实验执行计划 V3.1, 2026-11-04",
+  "status": "development implementation; not preregistered",
+  "K": 16,
+  "ages": [
+    1,
+    4,
+    8
+  ],
+  "H": 4,
+  "recordings": [
+    "crowd2",
+    "crowd3",
+    "balloon2"
+  ],
+  "branches": [
+    "A",
+    "O",
+    "F",
+    "T",
+    "P_native"
+  ],
+  "diagnostic_branches": [
+    "R_only",
+    "C_only"
+  ],
+  "parents": [
+    "A_native",
+    "P_maintained"
+  ],
+  "primary_effect": "A-native, K16, age 1/4/8, H4 target, paired T minus O AbsRel",
+  "P_native_future_repair_mode": "pre_readout",
+  "controlled_branch_future_repair_mode": "off",
+  "formal_inference_requires": "three distinct provenance-verified checkpoints per the inherited legacy protocol; reconcile with V3.1 frozen candidate before formal run",
+  "known_gaps": [
+    "V3.1 full dynamic confidence/refresh-boundary audit is not yet implemented",
+    "P_native pre_readout replay is implemented but has not been GPU-validated against an independently recorded native P trajectory",
+    "scene-group paired aggregation and V3.1 data-role overlap audit require final review before formal claims",
+    "CrossSource-v2 E4-C is supported for single-seed development only; GPU execution and independent native trajectory parity require validation; three-seed formal mode retains legacy Y04 provenance gates"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "experiment": "CVPR-M04 ClosedLoop-SameHead V3.1",
+  "status": "development_module_requires_preflight_and_cuda_canary",
+  "weight_source": {
+    "name": "E4-C Best",
+    "method": "P_multi",
+    "seed": 20261103,
+    "training_steps": 1000,
+    "selected_step": 700,
+    "checkpoint": "outputs/crosssource_v2_E4_20261104_C_s20261103_1000step/best_checkpoint.pt",
+    "sha256": "0447fbcc25d1ea93d5a80e7f8a7a3b38ac911a8465951009da53988e712754c0",
+    "initial_head_sha256": "fbb01f8d81da722fc73c34dff7b833800d32270f1ca3d7616830ce869c77c16f",
+    "repair_head_parameters": 170496,
+    "forbidden_substitutions": [
+      "Y04_P_multi_20261025",
+      "Y04_P_multi_20261101",
+      "Y04_P_multi_20261102",
+      "E8-C",
+      "E7",
+      "Y11"
+    ]
+  },
+  "runtime": {
+    "repository": "SVR-Depth",
+    "conda_environment": "svrdepth",
+    "model_runtime": "outputs/legacy_runtime/velodepth",
+    "training_helpers": "experiments/crosssource_v2/legacy_helpers",
+    "snapshot_sha256": "615335cd006663cd567e0a1c74bef7ed622ea733dbff016844ab64e3da22ce3e"
+  },
+  "protocol": {
+    "refresh_interval": 16,
+    "gain": 1.0,
+    "frequency": 1,
+    "readout": "raw",
+    "sequences": [
+      "crowd2",
+      "crowd3",
+      "balloon2"
+    ],
+    "branches": [
+      "A_off",
+      "O_same_head",
+      "F_only",
+      "P_full"
+    ],
+    "timing_repeats": 3,
+    "training": false,
+    "data_role": "development_only"
+  },
+  "metrics": [
+    "AbsRel",
+    "RMSE",
+    "delta1",
+    "valid_ratio",
+    "invalid_pred_gt_pixels"
+  ],
+  "primary_contrast": "P_full minus O_same_head sequence-level AbsRel",
+  "interpretation": "Continuous trajectories diverge after their state updates; M04 is not the same-parent single-intervention analysis in M05."
+}

@@ -1,0 +1,42 @@
+{
+  "experiment": "GT4-A2 Experiment 1: multi-state training + continuous full-sequence evaluation",
+  "protocol": {
+    "refresh_interval": 32,
+    "anchor_offsets_cycle_repeating": [
+      4,
+      12,
+      20
+    ],
+    "train_cycles": 24,
+    "future_frames_per_anchor": 4,
+    "steps_per_mode": 1000,
+    "learning_rate": 0.0001,
+    "seed": 20261024,
+    "depth_scale": 5000.0,
+    "max_rgb_gt_delta_ms": 20.0
+  },
+  "loss": "equal mean of four future-frame masked robust absolute log-depth losses; each frame independently averages valid pixels",
+  "optimizer": "AdamW",
+  "weight_decay": 0.0001,
+  "gradient_clip_norm": 1.0,
+  "backbone_frozen": true,
+  "checkpoint_selection": "final step only",
+  "evaluation_refresh_interval": 32,
+  "evaluation_reset_every_three_frames": false,
+  "evaluation_metrics_primary": "macro average of per-frame metrics over all matched frames, including keyframes",
+  "secondary_metrics": "propagated frames only; per-refresh-cycle A/C/D AbsRel comparisons",
+  "pair_hashes": {
+    "crowd2": "f7bf9226edcedf6c05d63938e29f92bf9364878c9291dbd79172c973c296f350",
+    "crowd3": "9f4da8360b8f6b3039330dc7fe9dba6dd7219d9427e774b89006b09269fa17ad",
+    "balloon2": "afbd46ebed192aaf69f580822993fb7c756c5656de0595f68143993859918b06"
+  },
+  "source_hashes": {
+    "velodepth/models/decoder_velo.py": "35ca12629accd1a2a77595f505165fa17dffab07c763a8b639604285b94bdb08",
+    "velodepth/models/persistent_feature_repair.py": "6dfc8b0c5565ea9139b8c266c5ef337b3309ce0fde2f365428fc44390b84117c",
+    "experiments/p1/gt2_fixed_clip_repair_train.py": "bf7cd2021b1d0bbf66d75502dba6afed87f4c8ff3ef58ff7b18f56ac28044192",
+    "experiments/p1/gt4a2_exp1_train_eval.py": "c24441cb405465c1a16a86127b51aade8f9af69b5d368f43d830d0e759ee3d7f"
+  },
+  "python": "3.11.17",
+  "torch": "2.6.0+cu124",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU"
+}

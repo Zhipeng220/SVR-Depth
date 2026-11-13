@@ -1,0 +1,40 @@
+{
+  "split_counts": {
+    "crowd2": 15
+  },
+  "dev_frames": 16,
+  "seed_list": [
+    20261112,
+    20261113,
+    20261114
+  ],
+  "batch_size": 8,
+  "max_epochs": 100,
+  "patience": 10,
+  "optimizer": "AdamW",
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "groupnorm_groups": 4,
+  "normalization": {
+    "source": "Bonn13 train only; valid correspondence pixels on propagation frames",
+    "pixels": 3090372,
+    "flow": {
+      "mean": 8.46943361147623,
+      "std": 6.9229988123957
+    },
+    "fb": {
+      "mean": 0.47643230529681374,
+      "std": 0.44686058518943184
+    }
+  },
+  "loss": "per-frame valid-GT mean absolute log depth error",
+  "sampling": "sequence-balanced replacement",
+  "grad_scaler": "CUDA AMP",
+  "ref_size": [
+    294,
+    392
+  ],
+  "camera_gt": false,
+  "keyframes": "native output for both methods",
+  "development_selection": "equal-sequence macro AbsRel"
+}

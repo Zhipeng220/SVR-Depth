@@ -1,0 +1,10 @@
+--- ORIGINAL_BASELINE
++++ CURRENT_CROSSSOURCE
+@@ -223,6 +223,7 @@
+ 
+ 
+ def preprocess_rgb(rgb_np: np.ndarray, device, paddings, new_shape, mean, std):
++    rgb_np = np.array(rgb_np, copy=True, order='C')
+     x = torch.from_numpy(rgb_np).permute(2, 0, 1).unsqueeze(0).to(device)
+     x = TF.normalize(x.float() / 255.0, mean=IMAGENET_DATASET_MEAN, std=IMAGENET_DATASET_STD)
+     x = F.pad(x, paddings, value=0.0)

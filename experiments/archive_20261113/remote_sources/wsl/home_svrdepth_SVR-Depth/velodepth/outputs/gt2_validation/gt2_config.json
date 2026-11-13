@@ -1,0 +1,31 @@
+{
+  "experiment": "GT2",
+  "description": "100-300 step fixed-clip real-GT optimizability test",
+  "clip_indices": [
+    8,
+    9,
+    10
+  ],
+  "target_index": 10,
+  "pair_csv": "/home/svrdepth/SVR-Depth/velodepth/outputs/gt1a1_validation/gt1a1_pairs.csv",
+  "pair_csv_sha256": "f7bf9226edcedf6c05d63938e29f92bf9364878c9291dbd79172c973c296f350",
+  "snapshot": "/home/svrdepth/hf_cache/hub/models--lpiccinelli--velodepth/snapshots/2b2ee9fe44d0b261e736653042cecd7693f99c8c",
+  "pretrained_weights_sha256": "615335cd006663cd567e0a1c74bef7ed622ea733dbff016844ab64e3da22ce3e",
+  "depth_scale": 5000.0,
+  "max_time_diff_ms": 20.0,
+  "loss": "masked robust absolute log-depth error",
+  "optimizer": "AdamW",
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0001,
+  "grad_clip_norm": 1.0,
+  "steps_per_mode": 100,
+  "modes": [
+    "C:pre_readout",
+    "D:post_readout"
+  ],
+  "seed": 20261024,
+  "amp": "CUDA autocast float16 + GradScaler",
+  "main_model_frozen": true,
+  "only_repair_head_trainable": true,
+  "generalization_claim": false
+}

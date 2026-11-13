@@ -1,0 +1,11 @@
+{
+  "method": "persistent_feature",
+  "training_cycle_frames": 32,
+  "cycles_per_sequence": 8,
+  "sequences": ["crowd2", "crowd3", "balloon2"],
+  "steps": 1000,
+  "initialization_seed": 20261024,
+  "training_seeds": [20261025, 20261101, 20261102],
+  "repair_mode": "pre_readout",
+  "implementation_status": "historical_compatibility_runner"
+}

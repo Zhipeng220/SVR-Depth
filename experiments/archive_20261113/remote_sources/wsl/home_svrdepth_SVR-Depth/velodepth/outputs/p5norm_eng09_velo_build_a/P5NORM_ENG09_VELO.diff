@@ -1,0 +1,84 @@
+--- eng06_rollout.py
++++ eng09_velo_rollout.py
+@@ -2,34 +2,38 @@
+ from pathlib import Path
+ os.environ['CUDA_VISIBLE_DEVICES']='0';os.environ.setdefault('OMP_NUM_THREADS','1')
+ import numpy as np,torch,cv2
+-ROOT=Path('/home/svrdepth/SVR-Depth/velodepth');OUT=ROOT/'outputs/p5norm_eng06_single_layer_h4';sys.path[:0]=[str(ROOT),str(ROOT/'experiments/p1'),str(OUT)]
++ROOT=Path('/home/svrdepth/SVR-Depth/velodepth');OUT=ROOT/'outputs/p5norm_eng09_velo_build_a';sys.path[:0]=[str(ROOT),str(ROOT/'experiments/p1'),str(OUT)]
+ import gt2_fixed_clip_repair_train as gt2,gt4a2_exp1_train_eval as exp1,cvpr_m05_formal as m05
+-from eng06_policy import build_policy_state
++from eng09_velo_policy import build_policy_state
+ policy=sys.argv[1];dest=OUT/policy;dest.mkdir(exist_ok=False);status={'policy':policy,'status':'FAIL'};trace=[];metrics=[];nonfeatures=[];start=time.monotonic()
+ try:
+  random.seed(20261025);np.random.seed(20261025);torch.manual_seed(20261025);torch.cuda.manual_seed_all(20261025);dev=torch.device('cuda:0');torch.cuda.reset_peak_memory_stats();print('PRE_MODEL_CUDA allocated',torch.cuda.memory_allocated(),'reserved',torch.cuda.memory_reserved(),flush=True);snap=Path.home()/'hf_cache/hub/models--lpiccinelli--velodepth/snapshots/2b2ee9fe44d0b261e736653042cecd7693f99c8c';model=gt2.load_model(snap,'pre_readout',dev);ck=torch.load(ROOT/'outputs/y04_v5_preserve_seed20261025_20261109_112607/final.pt',map_location='cpu',weights_only=False);model.pixel_decoder.persistent_feature_repair.load_state_dict(ck['repair_head_state_dict'],strict=True);del ck;model.eval()
+  for p in model.parameters():p.requires_grad_(False)
+- data=exp1.read_manifest(ROOT/'outputs/y04_v4_manifest_candidate_20261108_190940/person_tracking2_pairs_v4_candidate.csv',training=False);shape=exp1.shape_info_for(model,Path(data[0]['rgb_path']),dev);model._m05_shape=shape
++ data=exp1.read_manifest(OUT/'experiment_manifest.csv',training=False);shape=exp1.shape_info_for(model,Path(data[0]['rgb_path']),dev);model._m05_shape=shape
+  assert tuple(shape['original_shape'])==(480,640) and tuple(shape['network_shape'])==(434,574)
+- parent=ROOT/'outputs/p5norm_v2_4_independent_replication/runs/Bonn/person_tracking2/hold/anchor_1_tensors.pt';snapstate=torch.load(parent,map_location='cpu',weights_only=True);frozen={**{k:snapstate[k].clone() for k in ['radius','confidence','rays_map']},'features':[snapstate['s0_'+str(i)].clone() for i in range(1,5)]}
+- ref=OUT/'initial_parent.pt'
+- if ref.exists():
+-  z=torch.load(ref,map_location='cpu',weights_only=True);assert all(torch.equal(z[k],frozen[k]) for k in ['radius','confidence','rays_map']) and all(torch.equal(a,b) for a,b in zip(z['features'],frozen['features']))
+- else:torch.save(frozen,ref)
+- state={k:([x.to(dev) for x in v] if isinstance(v,list) else v.to(dev)) for k,v in frozen.items()};previous=exp1.load_frame(data[1],shape,dev,need_gt=False);inputs={'image':previous['img'],'features':[state['features'][0].permute(0,2,3,1)]};model.pixel_decoder.set_shapes(inputs,[{'T':1,'B':1}]);assert tuple(model.pixel_decoder.radial_module.original_shapes)==(434,574) and tuple(model.pixel_decoder.common_shape)==(31,41)
++ payload=torch.load(OUT/'P5NORM_ENG09_VELO_PARENT_STATE.pt',map_location='cpu',weights_only=True);frozen=payload['state'];meta=payload['metadata'];assert meta['parent_index']==2 and meta['anchor_idx']==3 and meta['h4_idx']==7
++ state={k:([x.to(dev) for x in v] if isinstance(v,list) else v.to(dev)) for k,v in frozen.items()};previous=exp1.load_frame(data[2],shape,dev,need_gt=False);assert str(previous['rgb_path'])==meta['parent_rgb'] and str(data[2]['rgb_timestamp'])==meta['parent_timestamp']
++ inputs={'image':previous['img'],'features':[state['features'][0].permute(0,2,3,1)]};model.pixel_decoder.set_shapes(inputs,[{'T':1,'B':1}]);dec=model.pixel_decoder
++ assert list(dec.common_shape)==meta['common_shape'] and list(dec.radial_module.shapes)==meta['radial_shape'] and list(dec.radial_module.original_shapes)==meta['radial_original_shapes'] and list(dec.angular_module.shapes)==meta['angular_shapes']
++ restore=[]
++ for k in ['features','radius','confidence','rays_map']:
++  aa=frozen[k] if isinstance(frozen[k],list) else [frozen[k]];bb=state[k] if isinstance(state[k],list) else [state[k]]
++  for j,(a,b) in enumerate(zip(aa,bb)):
++   z=b.detach().cpu();diff=float((a.float()-z.float()).abs().max());ok=a.shape==z.shape and a.dtype==z.dtype and torch.equal(a,z);assert ok;restore.append(dict(policy=policy,field=k+('_'+str(j+1) if isinstance(frozen[k],list) else ''),shape=str(tuple(z.shape)),saved_dtype=str(a.dtype),restored_dtype=str(z.dtype),restored_device=str(b.device),max_abs_difference=diff,exact=ok))
++ with (dest/'parent_restore.csv').open('x',newline='') as f:w=csv.DictWriter(f,fieldnames=list(restore[0]));w.writeheader();w.writerows(restore)
+  dis=cv2.DISOpticalFlow_create(cv2.DISOPTICAL_FLOW_PRESET_FAST);capt=[];reads=[]
+  def hook(mod,inp,out):capt.append(([x.detach().clone() for x in inp[0]],[x.detach().clone() for x in out],[x.untyped_storage().data_ptr() for x in inp[0]],[x.untyped_storage().data_ptr() for x in out]))
+  def profile(frame,event,arg):
+   if event=='call' and frame.f_code is gt2.fast_step.__code__:f=frame.f_locals['features_state'];reads.append(([x.detach().clone() for x in f],[x.untyped_storage().data_ptr() for x in f]))
+  handle=model.pixel_decoder.persistent_feature_repair.register_forward_hook(hook);previous_selected=None;previous_sources=None;steps=5
+  with torch.inference_mode():
+-  for i in range(2,2+steps):
++  for i in range(3,3+steps):
+    current=exp1.load_frame(data[i],shape,dev,need_gt=False);assert float(data[i]['rgb_timestamp'])>float(data[i-1]['rgb_timestamp']);static=exp1.transition_static(model,previous,current,shape,dis);capt.clear();reads.clear();nonfeature_input={k:state[k].detach().clone() for k in ['radius','confidence','rays_map']};sys.setprofile(profile)
+    try:native=m05.run_step(model,exp1,previous,current,static,state,torch)
+    finally:sys.setprofile(None)
+    if len(capt)!=1 or len(reads)!=1:raise RuntimeError('unexpected hook count')
+    for k in ['radius','confidence','rays_map']:
+-    a=nonfeature_input[k];b=native[k];assert a.shape==b.shape and torch.isfinite(a).all() and torch.isfinite(b).all();delta=(b.float()-a.float());nonfeatures.append(dict(policy=policy,step_index=i-1,field=k,shape=str(tuple(a.shape)),dtype=str(a.dtype),device=str(a.device),input_min=float(a.min()),input_max=float(a.max()),input_mean=float(a.float().mean()),output_min=float(b.min()),output_max=float(b.max()),output_mean=float(b.float().mean()),max_abs_difference=float(delta.abs().max()),l2_difference=float(torch.linalg.vector_norm(delta.reshape(-1))),input_finite=bool(torch.isfinite(a).all()),output_finite=bool(torch.isfinite(b).all())))
++    a=nonfeature_input[k];b=native[k];assert a.shape==b.shape and torch.isfinite(a).all() and torch.isfinite(b).all();delta=(b.float()-a.float());nonfeatures.append(dict(policy=policy,step_index=i-2,field=k,shape=str(tuple(a.shape)),dtype=str(a.dtype),device=str(a.device),input_min=float(a.min()),input_max=float(a.max()),input_mean=float(a.float().mean()),output_min=float(b.min()),output_max=float(b.max()),output_mean=float(b.float().mean()),max_abs_difference=float(delta.abs().max()),l2_difference=float(torch.linalg.vector_norm(delta.reshape(-1))),input_finite=bool(torch.isfinite(a).all()),output_finite=bool(torch.isfinite(b).all())))
+    if previous_selected is not None:
+     if not all(torch.equal(a,b) for a,b in zip(state['features'],previous_selected)):raise RuntimeError('input state mutated')
+     if not all(torch.equal(a,b) for a,b in zip(previous_sources[0],previous_sources[1])):raise RuntimeError('source mutated')
+@@ -38,25 +42,25 @@
+      trace[-4+l]['consumed_feature_storage']=reads[0][1][l];trace[-4+l]['next_read_equal']='True'
+    s0,s1,p0,p1=capt[0]
+    if not all(torch.equal(a,b) for a,b in zip(s1,native['features'])):raise RuntimeError('native not S1')
+-   if i==2:
++   if i==3:
+     observed={'s0_'+str(j):v.detach().cpu() for j,v in enumerate(s0,1)};observed.update({'s1_'+str(j):v.detach().cpu() for j,v in enumerate(s1,1)});observed.update({k:native[k].detach().cpu() for k in ['radius','confidence','rays_map']});ref=OUT/'anchor_common.pt'
+     if ref.exists():
+      reference=torch.load(ref,map_location='cpu',weights_only=True)
+      for k,v in observed.items():
+       if not torch.allclose(v,reference[k],rtol=1e-5,atol=1e-5):raise RuntimeError('anchor functional mismatch '+k)
+     else:torch.save(observed,ref)
+-   if i==2:
++   if i==3:
+     prediction=m05.make_prediction(model,gt2,native,shape);refpred=OUT/'first_prediction.npy'
+     if refpred.exists():
+      first=np.load(refpred);d=float(np.max(np.abs(first-prediction)));print('FIRST_PREDICTION_MAX_ABS',d,flush=True)
+      if not np.allclose(first,prediction,rtol=1e-5,atol=1e-5):raise RuntimeError('first prediction mismatch')
+     else:np.save(refpred,prediction)
+-   if i<=6:
+-    active_mask=policy if i==2 else '0000';choice=build_policy_state(native,s0,s1,active_mask);previous_sources=(s0+s1,[x.clone() for x in s0+s1]);selected=[x.clone() for x in choice['features']];previous_selected=selected
++   if i<=7:
++    active_mask=policy if i==3 else '0000';choice=build_policy_state(native,s0,s1,active_mask);previous_sources=(s0+s1,[x.clone() for x in s0+s1]);selected=[x.clone() for x in choice['features']];previous_selected=selected
+     for l in range(4):
+      expected=s1[l] if active_mask[l]=='1' else s0[l];err=float((choice['features'][l]-expected).abs().max());update=float(torch.linalg.vector_norm((s1[l]-s0[l]).float().reshape(-1)));state_change=float(torch.linalg.vector_norm((choice['features'][l]-reads[0][0][l]).float().reshape(-1)));assert err==0
+-     trace.append(dict(policy=policy,step_index=i-1,current_frame=Path(data[i]['rgb_path']).name,next_frame=Path(data[i+1]['rgb_path']).name,timestamp=data[i]['rgb_timestamp'],layer=l+1,expected='S1' if expected is s1[l] else 'S0',repair_hook_count=len(capt),input_feature_storage=reads[0][1][l],s0_storage=p0[l],s1_storage=p1[l],selected_feature_storage=choice['features'][l].untyped_storage().data_ptr(),consumed_feature_storage='',shape=str(tuple(expected.shape)),dtype=str(expected.dtype),device=str(expected.device),max_absolute_difference=err,update_l2=update,state_change_l2=state_change,finite=bool(torch.isfinite(expected).all()),next_read_equal='NOT_OBSERVED'))
+-    pred=m05.make_prediction(model,gt2,native,shape);assert np.isfinite(pred).all() and (pred>0).all();gt=exp1.load_frame(data[i],shape,dev,need_gt=True)['gt_np'];m=gt2.calculate_metrics(gt,pred);metrics.append(dict(policy=policy,step_index=i-1,frame=Path(data[i]['rgb_path']).name,AbsRel=m['AbsRel'],RMSE=m['RMSE'],valid_pixels=m['valid_pixels']));state=choice
++     trace.append(dict(policy=policy,step_index=i-2,current_frame=Path(data[i]['rgb_path']).name,next_frame=Path(data[i+1]['rgb_path']).name,timestamp=data[i]['rgb_timestamp'],layer=l+1,expected='S1' if expected is s1[l] else 'S0',repair_hook_count=len(capt),input_feature_storage=reads[0][1][l],s0_storage=p0[l],s1_storage=p1[l],selected_feature_storage=choice['features'][l].untyped_storage().data_ptr(),consumed_feature_storage='',shape=str(tuple(expected.shape)),dtype=str(expected.dtype),device=str(expected.device),max_absolute_difference=err,update_l2=update,state_change_l2=state_change,finite=bool(torch.isfinite(expected).all()),next_read_equal='NOT_OBSERVED'))
++    pred=m05.make_prediction(model,gt2,native,shape);assert np.isfinite(pred).all() and (pred>0).all();gt=exp1.load_frame(data[i],shape,dev,need_gt=True)['gt_np'];m=gt2.calculate_metrics(gt,pred);metrics.append(dict(policy=policy,step_index=i-2,frame=Path(data[i]['rgb_path']).name,AbsRel=m['AbsRel'],RMSE=m['RMSE'],valid_pixels=m['valid_pixels']));state=choice
+    previous=current
+  torch.cuda.synchronize();handle.remove();status.update(status='PASS',run_step_calls=steps,policy_steps=5,next_read_verified=sum(x['next_read_equal']=='True' for x in trace),elapsed_seconds=time.monotonic()-start,peak_allocated_mib=torch.cuda.max_memory_allocated()/1048576,peak_reserved_mib=torch.cuda.max_memory_reserved()/1048576)
+ except Exception:status['error']=traceback.format_exc();print(status['error'],flush=True)

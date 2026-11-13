@@ -1,0 +1,80 @@
+{
+  "protocol": "M01_PAPER_K16_UNVERIFIED_TEMPLATE",
+  "refresh_interval": 16,
+  "gain": 1,
+  "frequency": 1,
+  "snapshot": {
+    "path": "/EDIT/velodepth-snapshot",
+    "config_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "weights_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "methods": [
+    {
+      "method": "A",
+      "seed": "native"
+    },
+    {
+      "method": "P_multi",
+      "seed": "20261103",
+      "checkpoint": "/EDIT/E4-C_best_checkpoint.pt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "state_key": "head_state"
+    }
+  ],
+  "sequences": [
+    {
+      "dataset": "Bonn",
+      "sequence": "EDIT_BONN_DEVELOPMENT_SEQUENCE",
+      "scene": "EDIT_PHYSICAL_SCENE",
+      "hdf5": "/EDIT/Bonn.hdf5",
+      "split_key": "train.txt",
+      "depth_scale": 1000,
+      "min_depth_m": 0.001,
+      "max_depth_m": 10.0
+    },
+    {
+      "dataset": "TUM",
+      "sequence": "EDIT_TUM_DEVELOPMENT_SEQUENCE",
+      "scene": "EDIT_PHYSICAL_SCENE",
+      "hdf5": "/EDIT/TUM.hdf5",
+      "split_key": "train.txt",
+      "depth_scale": 1000,
+      "min_depth_m": 0.001,
+      "max_depth_m": 10.0
+    },
+    {
+      "dataset": "ScanNet",
+      "sequence": "EDIT_SCANNET_DEVELOPMENT_SEQUENCE",
+      "scene": "EDIT_PHYSICAL_SCENE",
+      "hdf5": "/EDIT/ScanNet.hdf5",
+      "split_key": "train.txt",
+      "sequences_key": "sequences_.json",
+      "depth_scale": 1000,
+      "min_depth_m": 0.01,
+      "max_depth_m": 10.0
+    },
+    {
+      "dataset": "Sintel",
+      "sequence": "EDIT_SINTEL_DEVELOPMENT_SEQUENCE",
+      "scene": "EDIT_PHYSICAL_SCENE",
+      "hdf5": "/EDIT/Sintel.hdf5",
+      "split_key": "training.txt",
+      "depth_scale": 1000,
+      "min_depth_m": 0.001,
+      "max_depth_m": 1000.0
+    }
+  ],
+  "save_predictions": true,
+  "compute_ssi": false,
+  "compute_upstream_depth_metrics": true,
+  "temporal": {
+    "enabled": true,
+    "protocol": "provisional_v1"
+  },
+  "hash_hdf5_content": false,
+  "bootstrap_samples": 2000,
+  "timing_repeats": 3,
+  "timing_warmup_frames": 16,
+  "formal_paper_result": true,
+  "paper_note": "Template only: data roles, temporal metric, author preprocessing and aggregation remain unverified."
+}

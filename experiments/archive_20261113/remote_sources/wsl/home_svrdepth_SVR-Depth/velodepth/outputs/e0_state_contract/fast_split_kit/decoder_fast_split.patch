@@ -1,0 +1,68 @@
+--- a/velodepth/models/decoder_velo.py
++++ b/velodepth/models/decoder_velo.py
+@@ -399,9 +399,10 @@
+         logdepth_teacher, logconf_teacher = self.decode(features_teacher)
+         return logdepth_teacher, logconf_teacher, cond_features
+ 
+-    def forward_fast(
++    def propagate_features(
+         self, lateral_features_teacher, features_residual, flow_bwd, flow_features
+     ):
++        """Run the native warp-and-fusion stage without the depth readout."""
+         features_propagated = []
+         for i, (init_, residual) in enumerate(
+             zip(lateral_features_teacher, features_residual)
+@@ -421,13 +422,15 @@
+                 flow_features=flow_features,
+             )
+             features_propagated.append(corrected_features)
+-
++        return features_propagated
++
++    def readout_fast(self, features_propagated):
++        """Apply the native fast decoder readout to a propagated state."""
+         lateral_features = [features_propagated[0]] + [
+             self.process_features[i](features_propagated[i + 1])
+             for i in range(len(self.ups))
+         ]
+ 
+-        # run decoder
+         latents = lateral_features[0]
+         features_student = []
+         for i, up in enumerate(self.ups):
+@@ -435,8 +438,18 @@
+             latents = up(latents)
+             features_student.append(latents)
+         logdepth_student = self.depth_proj(features_student)
++
++        # Preserve the original VeloDepth fast-path semantics.
+         logconf_student = logdepth_student
+-
++        return logdepth_student, logconf_student
++
++    def forward_fast(
++        self, lateral_features_teacher, features_residual, flow_bwd, flow_features
++    ):
++        features_propagated = self.propagate_features(
++            lateral_features_teacher, features_residual, flow_bwd, flow_features
++        )
++        logdepth_student, logconf_student = self.readout_fast(features_propagated)
+         return logdepth_student, logconf_student, features_propagated
+ 
+     def forward(
+@@ -619,6 +632,15 @@
+         confidence_student = torch.exp(logconf_student.clip(min=-8.0, max=10.0))
+         return rad_student, confidence_student, lateral_features_student
+ 
++    def readout_fast_features(self, features_propagated):
++        """Read out radius/confidence from an already propagated or repaired state."""
++        lograd_student, logconf_student = self.radial_module.readout_fast(
++            features_propagated
++        )
++        rad_student = torch.exp(lograd_student.clip(min=-8.0, max=8.0) + 2.0)
++        confidence_student = torch.exp(logconf_student.clip(min=-8.0, max=10.0))
++        return rad_student, confidence_student
++
+     def set_shapes(self, inputs, image_metas) -> torch.Tensor:
+         H, W = inputs["image"].shape[-2:]
+         self.common_shape = inputs["features"][0].shape[1:3]
