@@ -1,0 +1,900 @@
+{
+  "included": [
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/decoder_velo.py.before_d13",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\decoder_velo.py.before_d13",
+      "sha256": "cbce40fa2fd931f47c45bb87d9ac75a21b2ccd0f56146de30be1216828d09dd7",
+      "bytes": 25890
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/.gitignore",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\gitignore.txt",
+      "sha256": "9daf0f7de080e6ed6f6d7fe16d5ef5f96be652ddbf65adffa9235d55d5f3c2df",
+      "bytes": 167
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/LICENSE",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\LICENSE",
+      "sha256": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/velodepth/models/decoder_velo.py.pre_e0_split.bak",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\velodepth\\models\\decoder_velo.py.pre_e0_split.bak",
+      "sha256": "cbce40fa2fd931f47c45bb87d9ac75a21b2ccd0f56146de30be1216828d09dd7",
+      "bytes": 25890
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/experiments/p1/p1_multihorizon_counterfactual.py.bak",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\experiments\\p1\\p1_multihorizon_counterfactual.py.bak",
+      "sha256": "ffa44dd3c105e8a562b0abe7dd005bbd37ab143fb45cb2ca1947a2fc4ef73b2a",
+      "bytes": 20217
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/experiments/p1/p1_multihorizon_counterfactual.py.pre_gtmask.bak",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\experiments\\p1\\p1_multihorizon_counterfactual.py.pre_gtmask.bak",
+      "sha256": "ffa44dd3c105e8a562b0abe7dd005bbd37ab143fb45cb2ca1947a2fc4ef73b2a",
+      "bytes": 20217
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth/velodepth/experiments/p1/e2_local_state_repair_counterfactual.py.pre_ray_fix.bak",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth\\velodepth\\experiments\\p1\\e2_local_state_repair_counterfactual.py.pre_ray_fix.bak",
+      "sha256": "f7bfff617b3d1e556aaba5d823632cb291006f9738f7dc59eecf60b934d92009",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/.gitignore",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\gitignore.txt",
+      "sha256": "3d83a58b77a3a888896b81b14c6a4ff7b47856043ba56e26885dc1cd866a61d4",
+      "bytes": 240
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/LICENSE",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\LICENSE",
+      "sha256": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/outputs/legacy_runtime/.gitignore",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\outputs\\legacy_runtime\\gitignore.txt",
+      "sha256": "3d83a58b77a3a888896b81b14c6a4ff7b47856043ba56e26885dc1cd866a61d4",
+      "bytes": 240
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/outputs/legacy_runtime/LICENSE",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\outputs\\legacy_runtime\\LICENSE",
+      "sha256": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/outputs/legacy_runtime/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/outputs/legacy_runtime/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/outputs/legacy_runtime/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/outputs/legacy_runtime/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/outputs/legacy_runtime/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/outputs/legacy_runtime/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/outputs/legacy_runtime/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/outputs/legacy_runtime/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/reference/Velodepth-upstream/.gitignore",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\reference\\Velodepth-upstream\\gitignore.txt",
+      "sha256": "9daf0f7de080e6ed6f6d7fe16d5ef5f96be652ddbf65adffa9235d55d5f3c2df",
+      "bytes": 167
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/reference/Velodepth-upstream/LICENSE",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\reference\\Velodepth-upstream\\LICENSE",
+      "sha256": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/reference/Velodepth-upstream/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/reference/Velodepth-upstream/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/reference/Velodepth-upstream/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/reference/Velodepth-upstream/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-CVPR/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-CVPR\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/experiments/p1/gt4a1_package_review.py.pre_compact.bak",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\experiments\\p1\\gt4a1_package_review.py.pre_compact.bak",
+      "sha256": "d88739d0cd2d68822e73e126e1c2b38e88ef91de61cbc0525163dde56acd51b0",
+      "bytes": 2147
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/experiments/p1/gt4a2_y04_v4_bonn_train.py.before_identity_fix.bak",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\experiments\\p1\\gt4a2_y04_v4_bonn_train.py.before_identity_fix.bak",
+      "sha256": "b6c3bf931e58941dfd7feb5e901202df8e1c66aef7db2d9de5791b6f2ea52312",
+      "bytes": 16893
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/experiments/p1/gt4a2_y04_v4_bonn_train_v0_2.py.before_memory_fix.bak",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\experiments\\p1\\gt4a2_y04_v4_bonn_train_v0_2.py.before_memory_fix.bak",
+      "sha256": "25cd082e2bf50e683c11c3fd711e78fdc059c000d2067d2d1f419d287a066132",
+      "bytes": 23711
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/experiments/p1/run_gt4a1.sh.pre_conda_fix.bak",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\experiments\\p1\\run_gt4a1.sh.pre_conda_fix.bak",
+      "sha256": "644ef6725194eb80dbb8ec7db5c58cf4d17c67e7504505c73b5ec067b36bcb05",
+      "bytes": 1481
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/experiments/p1/gt4a2_y04_v4_bonn_train_v0_2.py.original_download.bak",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\experiments\\p1\\gt4a2_y04_v4_bonn_train_v0_2.py.original_download.bak",
+      "sha256": "6a57c634cac015ff908d7e4338fc77e912370864a1a89f067663ed660d243004",
+      "bytes": 21556
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/velodepth/models/decoder_velo.py.pre_e0_split.bak",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\velodepth\\models\\decoder_velo.py.pre_e0_split.bak",
+      "sha256": "cbce40fa2fd931f47c45bb87d9ac75a21b2ccd0f56146de30be1216828d09dd7",
+      "bytes": 25890
+    },
+    {
+      "source": "/root/autodl-tmp/SVR-Depth-WSL-snapshot-20261111/velodepth/models/decoder_velo.py.pre_e0_split_20261023_163543.bak",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\SVR-Depth-WSL-snapshot-20261111\\velodepth\\models\\decoder_velo.py.pre_e0_split_20261023_163543.bak",
+      "sha256": "b905e95a3abf1247debc148715e0e8020de1d63b584c06493dd9442bf35c5c24",
+      "bytes": 27034
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/.gitignore",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\gitignore.txt",
+      "sha256": "3d83a58b77a3a888896b81b14c6a4ff7b47856043ba56e26885dc1cd866a61d4",
+      "bytes": 240
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/LICENSE",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\LICENSE",
+      "sha256": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/outputs/legacy_runtime/.gitignore",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\outputs\\legacy_runtime\\gitignore.txt",
+      "sha256": "3d83a58b77a3a888896b81b14c6a4ff7b47856043ba56e26885dc1cd866a61d4",
+      "bytes": 240
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/outputs/legacy_runtime/LICENSE",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\outputs\\legacy_runtime\\LICENSE",
+      "sha256": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/outputs/legacy_runtime/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/outputs/legacy_runtime/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/outputs/legacy_runtime/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/outputs/legacy_runtime/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/outputs/legacy_runtime/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/outputs/legacy_runtime/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/outputs/legacy_runtime/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/outputs/legacy_runtime/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\outputs\\legacy_runtime\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/reference/Velodepth-upstream/.gitignore",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\reference\\Velodepth-upstream\\gitignore.txt",
+      "sha256": "9daf0f7de080e6ed6f6d7fe16d5ef5f96be652ddbf65adffa9235d55d5f3c2df",
+      "bytes": 167
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/reference/Velodepth-upstream/LICENSE",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\reference\\Velodepth-upstream\\LICENSE",
+      "sha256": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/reference/Velodepth-upstream/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/reference/Velodepth-upstream/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/reference/Velodepth-upstream/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/reference/Velodepth-upstream/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/SVR-Depth-M01-M04-M05/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\SVR-Depth-M01-M04-M05\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/.gitignore",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\gitignore.txt",
+      "sha256": "3d83a58b77a3a888896b81b14c6a4ff7b47856043ba56e26885dc1cd866a61d4",
+      "bytes": 240
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/LICENSE",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\LICENSE",
+      "sha256": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/reference/Velodepth-upstream/.gitignore",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\reference\\Velodepth-upstream\\gitignore.txt",
+      "sha256": "9daf0f7de080e6ed6f6d7fe16d5ef5f96be652ddbf65adffa9235d55d5f3c2df",
+      "bytes": 167
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/reference/Velodepth-upstream/LICENSE",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\reference\\Velodepth-upstream\\LICENSE",
+      "sha256": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/fourdata_stage_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\fourdata_stage_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/.gitignore",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\gitignore.txt",
+      "sha256": "3d83a58b77a3a888896b81b14c6a4ff7b47856043ba56e26885dc1cd866a61d4",
+      "bytes": 240
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/LICENSE",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\LICENSE",
+      "sha256": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/configs/eval/m01_fullseq_k16_e4c_20261106.json.bak",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\configs\\eval\\m01_fullseq_k16_e4c_20261106.json.bak",
+      "sha256": "ea68e75feae3267699bf0645e2d224c90488d0b3a8638a0e71e2a94d203ee223",
+      "bytes": 88583
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/reference/Velodepth-upstream/.gitignore",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\reference\\Velodepth-upstream\\gitignore.txt",
+      "sha256": "9daf0f7de080e6ed6f6d7fe16d5ef5f96be652ddbf65adffa9235d55d5f3c2df",
+      "bytes": 167
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/reference/Velodepth-upstream/LICENSE",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\reference\\Velodepth-upstream\\LICENSE",
+      "sha256": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/reference/Velodepth-upstream/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\reference\\Velodepth-upstream\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/M01_temporal_dev_20261106/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\M01_temporal_dev_20261106\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/m01_knn_build_20261106/source/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\m01_knn_build_20261106\\source\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/m01_knn_build_20261106/source/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\m01_knn_build_20261106\\source\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/m01_knn_build_20261106/source/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\m01_knn_build_20261106\\source\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/m01_knn_build_20261106/source/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\m01_knn_build_20261106\\source\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/m01_knn_build_20261106/source/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\m01_knn_build_20261106\\source\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/m01_knn_build_20261106/source/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\m01_knn_build_20261106\\source\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/m01_knn_build_20261106/source/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\m01_knn_build_20261106\\source\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/m01_knn_build_20261106/source/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\m01_knn_build_20261106\\source\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/upstream_numpy_compat_20261106/.gitignore",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\upstream_numpy_compat_20261106\\gitignore.txt",
+      "sha256": "9daf0f7de080e6ed6f6d7fe16d5ef5f96be652ddbf65adffa9235d55d5f3c2df",
+      "bytes": 167
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/upstream_numpy_compat_20261106/LICENSE",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\upstream_numpy_compat_20261106\\LICENSE",
+      "sha256": "1349a4b6148492b44f629e64eed676612e234fe9a839e4f3b277c1482c8849f1",
+      "bytes": 20849
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/upstream_numpy_compat_20261106/velodepth/ops/knn/src/knn.cu",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\upstream_numpy_compat_20261106\\velodepth\\ops\\knn\\src\\knn.cu",
+      "sha256": "51cf18f6b83118392935a71fd01f9856efdf136b43d937219b9f76dcf433857c",
+      "bytes": 22244
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/upstream_numpy_compat_20261106/velodepth/ops/knn/src/knn.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\upstream_numpy_compat_20261106\\velodepth\\ops\\knn\\src\\knn.h",
+      "sha256": "3eceb752d9808548432c0d6f38e20f3ab6e86c05f871d545671391d6706bc7c7",
+      "bytes": 5449
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/upstream_numpy_compat_20261106/velodepth/ops/knn/src/knn_cpu.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\upstream_numpy_compat_20261106\\velodepth\\ops\\knn\\src\\knn_cpu.cpp",
+      "sha256": "f8e7ea0e26239e20417ab1f7d883509f7e450ae8000ed62f0d371647679cd9c9",
+      "bytes": 4192
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/upstream_numpy_compat_20261106/velodepth/ops/knn/src/knn_ext.cpp",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\upstream_numpy_compat_20261106\\velodepth\\ops\\knn\\src\\knn_ext.cpp",
+      "sha256": "bdb10941ecffbd8b7b58ecff92bee2e4a3cb0cf9906ceb737b01081ed1b66cd4",
+      "bytes": 271
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/upstream_numpy_compat_20261106/velodepth/ops/knn/src/utils/dispatch.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\upstream_numpy_compat_20261106\\velodepth\\ops\\knn\\src\\utils\\dispatch.cuh",
+      "sha256": "58181311e95e02ccafc191cda6afef3ae554f2d1eab313c56356a614a7a846d6",
+      "bytes": 10395
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/upstream_numpy_compat_20261106/velodepth/ops/knn/src/utils/index_utils.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\upstream_numpy_compat_20261106\\velodepth\\ops\\knn\\src\\utils\\index_utils.cuh",
+      "sha256": "8e883dbf45c548b389c8cf456e08275fe6e679dfc1ad98a25156c5993562ff37",
+      "bytes": 5334
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/upstream_numpy_compat_20261106/velodepth/ops/knn/src/utils/mink.cuh",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\upstream_numpy_compat_20261106\\velodepth\\ops\\knn\\src\\utils\\mink.cuh",
+      "sha256": "8b73a2f97de77231eec432eea70d64374a331c618a786ab1e6355e1783071013",
+      "bytes": 4720
+    },
+    {
+      "source": "/root/autodl-tmp/m01_20261106/upstream_numpy_compat_20261106/velodepth/ops/knn/src/utils/pytorch3d_cutils.h",
+      "destination": "experiments\\archive_20261113\\remote_sources\\autodl_source_extra\\m01_20261106\\upstream_numpy_compat_20261106\\velodepth\\ops\\knn\\src\\utils\\pytorch3d_cutils.h",
+      "sha256": "bbd95f18ec41a9f53dee3ee0e383adf5fde2760f450e833fb6a9159b5bf27b41",
+      "bytes": 522
+    }
+  ],
+  "quarantined": [],
+  "errors": []
+}
