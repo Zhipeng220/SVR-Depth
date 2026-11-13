@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "svr-depth"
+version = "1.0.0"
+authors = [{name = "SVR-Depth Research Team"}]
+description = "Persistent feature repair for VeloDepth streaming depth propagation"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {file = "LICENSE"}
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.packages.find]
+include = ["velodepth*", "svr_depth*"]
+
+[tool.setuptools.package-data]
+"velodepth.ops.losses.resources" = ["*.npz"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"

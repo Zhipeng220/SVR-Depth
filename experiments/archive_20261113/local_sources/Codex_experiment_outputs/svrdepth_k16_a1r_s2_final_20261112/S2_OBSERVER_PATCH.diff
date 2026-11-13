@@ -1,0 +1,23 @@
+--- S1
++++ S2
+@@ -13,7 +13,7 @@
+  return h.hexdigest()
+ protocol={'purpose':'A1 Bonn fixed arm repeat; original K16 code; baseline has V5 checkpoint confirmed separately','K':16,'max_frames':nlimit}
+ (out/'protocol.json').write_text(json.dumps(protocol,indent=2))
+-snaps={16:{},17:{},18:{}}; decoder_log=[]; forward_role='NONE'; counts={'fast_calls':0,'repair_calls':0,'keyframes':0,'forward_started':0,'forward_completed':0,'frames_completed':0}; current_i=-1
++snaps={i:{} for i in ([16,17,18,32,33,34,48,49,50] if nlimit>=64 else [16,17,18])}; decoder_log=[]; forward_role='NONE'; counts={'fast_calls':0,'repair_calls':0,'keyframes':0,'forward_started':0,'forward_completed':0,'frames_completed':0}; current_i=-1
+ ledger=(out/'S0R_RUNTIME_LEDGER.jsonl').open('a',buffering=1)
+ def log(event,**kw):
+  ledger.write(json.dumps({'event':event,'frame_index':current_i,'age':current_i%16 if current_i>=0 else None,'branch':sys.argv[3],**kw})+'\n');ledger.flush()
+@@ -28,6 +28,11 @@
+ def prof(fr,event,arg):
+  global forward_role
+  if event=='call' and fr.f_code in (model.pixel_decoder.forward_keyframe.__func__.__code__,model.pixel_decoder.forward_fast.__func__.__code__) and current_i in snaps:record_decoder('actual_'+fr.f_code.co_name+'_entry')
++ if event=='call' and fr.f_code is model.pixel_decoder.radial_module.forward_fast.__func__.__code__ and current_i in snaps:
++  for j,x in enumerate(fr.f_locals['lateral_features_teacher']):snaps[current_i]['effective_'+forward_role+'_feature_'+str(j+1)]=capture_tensor_snapshot(x)
++  record_decoder('radial_actual_consumer_entry')
++ if event=='call' and fr.f_code is model.pixel_decoder.forward_fast.__func__.__code__ and current_i in snaps:
++  metas=fr.f_locals['image_metas'][0];snaps[current_i]['transform_'+forward_role+'_B_T']=np.array([metas['B'],metas['T']],dtype=np.int64)
+  if event=='call' and fr.f_code is m04.forward_step.__code__:forward_role=fr.f_locals['mode']
+  if fr.f_code in (exp1.keyframe_state.__code__,m04.forward_step.__code__):
+   if event=='call':counts['forward_started']+=1;log('forward_started',function=fr.f_code.co_name)

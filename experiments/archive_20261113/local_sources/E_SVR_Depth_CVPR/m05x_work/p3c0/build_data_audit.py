@@ -1,0 +1,22 @@
+import csv,json
+from pathlib import Path
+ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'docs/m05x/p3c0';p3a=ROOT/'docs/m05x/p3a';p2b=ROOT/'docs/m05x/p2b'
+hashes=json.loads((OUT/'video_hash_audit.json').read_text(encoding='utf8'));keydata=json.loads((OUT/'video_metadata_remote.json').read_text(encoding='utf8'));keylookup={};lookup={}
+for domain,data in keydata.items():
+ for r in data['results']:keylookup[(domain,r['val_sequence'])]=r;keylookup[(domain,r['train_sequence'])]=r
+for domain,data in hashes.items():
+ for r in data['results']:
+  lookup[(domain,r['val_sequence'])]=r;lookup[(domain,r['train_sequence'])]=r
+with (p3a/'independent_candidate_inventory.csv').open(encoding='utf-8-sig',newline='') as f:prior=list(csv.DictReader(f))
+records=[]
+for x in prior:
+ r=lookup.get((x['dataset'],x['sequence']));kr=keylookup.get((x['dataset'],x['sequence']),{});exact=x['exact_known_usage'];is_p2b='P2-B' in exact;known=bool(exact)
+ records.append({'dataset':x['dataset'],'sequence':x['sequence'],'split':x['split_membership'],'known_p2b_usage':is_p2b,'other_protocol_listing':exact,'physical_video_evidence':'same RGB HDF5 path-prefix as normalized train/val pair' if r and r.get('prefix_sets_equal') else 'NOT_ESTABLISHED','matching_train_val_pair':bool(r and r.get('pair_found')),'same_pair_rgb_key_overlap':kr.get('common_rgb_key_count','NOT_AUDITED'),'same_pair_rgb_hash_overlap':r['image']['common_hash_count'] if r and r.get('pair_found') else 'NOT_AUDITED','same_pair_depth_hash_overlap':r['depth']['common_hash_count'] if r and r.get('pair_found') else 'NOT_AUDITED','frame_counts_equal':x['metadata_lengths_equal'],'first16_keys_exist':x['first16_keys_exist'],'time_range_overlap':'NOT_ESTABLISHED','full_history':'INCOMPLETE','independent_validation_certified':False,'independent_final_test_certified':False,'category':'CONFIRMED_P2B_DEVELOPMENT' if is_p2b else 'LISTED_IN_DEVELOPMENT_PROTOCOL' if known else 'PHYSICAL_IDENTITY_OR_USAGE_UNCONFIRMED','scope':'same normalized train/val pair only; cross-video duplicates not audited; matching payload hash does not establish time identity'})
+metadata=json.loads((p2b/'sequence_manifest.json').read_text(encoding='utf8'));anchors=json.loads((p2b/'anchor_manifest.json').read_text(encoding='utf8'))['anchors']
+for s in metadata['sequences']['Bonn']:
+ seq=s['sequence'];aid=next(a['anchor_id'] for a in anchors if a['dataset']=='Bonn' and a['sequence']==seq and a['age']==1);m=json.loads((p2b/'runs'/aid/'capture_metadata.json').read_text(encoding='utf8'));sample=m['inputs'][0]
+ records.append({'dataset':'Bonn','sequence':seq,'split':'Bonn development','known_p2b_usage':True,'other_protocol_listing':'P2-B','physical_video_evidence':'pair CSV + input path; full physical/scene mapping not established','matching_train_val_pair':'NOT_APPLICABLE','same_pair_rgb_key_overlap':'NOT_AUDITED','same_pair_rgb_hash_overlap':'NOT_AUDITED','same_pair_depth_hash_overlap':'NOT_AUDITED','frame_counts_equal':'pair manifest matched','first16_keys_exist':'P2-B scan','time_range_overlap':'NOT_ESTABLISHED','full_history':'INCOMPLETE','independent_validation_certified':False,'independent_final_test_certified':False,'category':'CONFIRMED_P2B_DEVELOPMENT','scope':'sample RGB SHA256 '+sample['rgb_sha256']+'; no cross-sequence duplicate audit'})
+with (OUT/'independent_data_audit.csv').open('w',encoding='utf-8-sig',newline='') as f:
+ w=csv.DictWriter(f,fieldnames=list(records[0]));w.writeheader();w.writerows(records)
+summary={'row_count':len(records),'categories':{k:sum(x['category']==k for x in records) for k in sorted({x['category'] for x in records})},'independent_validation_certified':0,'independent_final_test_certified':0,'same_pair_audit':{d:{'pairs':len(v['results']),'same_video_prefix':sum(x.get('prefix_sets_equal',False) for x in v['results']),'rgb_hash_overlap_pairs':sum(x.get('image',{}).get('common_hash_count',0)>0 for x in v['results']),'depth_hash_overlap_pairs':sum(x.get('depth',{}).get('common_hash_count',0)>0 for x in v['results'])} for d,v in hashes.items()},'limitations':['No complete use-history inventory','No cross-video hash comparison','Exact temporal overlap and original timestamps not established','Encoded-byte differences do not rule out decoded-image duplicates','Sintel pairing and beyond existing Bonn5 not audited']}
+(OUT/'independent_data_summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf8');print(json.dumps(summary,ensure_ascii=False))

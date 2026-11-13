@@ -1,0 +1,29 @@
+{
+  "version": "P4AB-1.1",
+  "status": "PROVISIONAL_NOT_CERTIFIED",
+  "purpose": "Conservative descriptive sensitivity only; no independence, fitting or significance claims.",
+  "Bonn": {
+    "BONN_RELATED_PROVISIONAL": [
+      "person_tracking2",
+      "placing_nonobstructing_box",
+      "removing_nonobstructing_box"
+    ],
+    "BONN_UNKNOWN_SHARED": "all other Bonn sequences"
+  },
+  "TUM": {
+    "TUM_DESK_ROOM_PROVISIONAL": [
+      "fr1_desk",
+      "fr1_desk2",
+      "fr1_room"
+    ],
+    "TUM_UNKNOWN_SHARED": "all other TUM sequences"
+  },
+  "ScanNet": {
+    "SCANNET_ALL_UNKNOWN": "all eight sequence records together; domain holdout only"
+  },
+  "matching": "TUM IDs use last path component, then remove an exact _val/_train suffix; no prefix-only matching",
+  "unknowns": "all other unknown relations remain unknown; shared buckets are conservative sensitivity choices, not proven same source",
+  "analysis": "within-sequence anchor mean, descriptive domain Spearman, provisional group mean; no significance test; grouping version 1.1 follows prior audits",
+  "no_real_label_fitting": true,
+  "not_prospective": "Analysis follows prior experiments and audits; this file is not a pre-outcome registration."
+}

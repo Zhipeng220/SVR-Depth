@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "dataset_id": "tartanair",
+  "split": "train",
+  "scene_id": "REPLACE_WITH_VERIFIED_SCENE_ID",
+  "sequence_id": "REPLACE_WITH_VERIFIED_CAMERA_TRAJECTORY_ID",
+  "color_space": "RGB",
+  "depth": {
+    "encoding": "npy_float32",
+    "npz_key": null,
+    "scale_to_m": 1.0,
+    "type": "camera_z",
+    "registered_to_rgb": true,
+    "invalid_values": [0, -1],
+    "min_depth_m": 0.05,
+    "max_depth_m": 80.0
+  },
+  "camera": {
+    "model": "pinhole",
+    "intrinsics": [500.0, 500.0, 320.0, 240.0]
+  },
+  "frames": [
+    {
+      "frame_index": 0,
+      "timestamp_s": 0.0,
+      "source_frame_id": "REPLACE_WITH_SOURCE_ID",
+      "rgb": "rgb/000000.png",
+      "depth": null,
+      "valid_mask": null
+    },
+    {
+      "frame_index": 1,
+      "timestamp_s": 0.0333333333,
+      "source_frame_id": "REPLACE_WITH_SOURCE_ID",
+      "rgb": "rgb/000001.png",
+      "depth": "depth/000001.npy",
+      "valid_mask": null
+    }
+  ]
+}

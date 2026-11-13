@@ -1,0 +1,45 @@
+{
+  "protocol": "V1.1",
+  "dataset": "Bonn official HDF5 same-index benchmark",
+  "sequences": [
+    "moving_obstructing_box",
+    "person_tracking2",
+    "removing_nonobstructing_box",
+    "moving_nonobstructing_box",
+    "placing_nonobstructing_box"
+  ],
+  "native_size": [
+    434,
+    574
+  ],
+  "reference_sizes": [
+    [
+      224,
+      294
+    ],
+    [
+      294,
+      392
+    ]
+  ],
+  "camera_gt": false,
+  "K": 16,
+  "reference_resize": {
+    "mode": "bilinear",
+    "align_corners": false,
+    "antialias": false
+  },
+  "gt_depth_range": [
+    0.001,
+    10.0
+  ],
+  "gt_mask": "official Bonn Loader depth_mask",
+  "fixed_alphas": [
+    0.2,
+    0.5
+  ],
+  "aggregation": "per-frame metrics averaged per sequence; equal-sequence macro after completion",
+  "complement_population": "propagation frames; official GT mask; fallback counted as not better",
+  "flow": "DIS bidirectional, current-frame inverse bilinear sample, align_corners=False",
+  "timing_note": "offline component timing is diagnostic, not end-to-end"
+}

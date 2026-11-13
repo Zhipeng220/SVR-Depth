@@ -1,0 +1,63 @@
+{
+  "version": "P4BE-1.0",
+  "purpose": "exploratory, sequence labels are not certified independent physical recordings",
+  "data": "docs\\m05x\\p4ab\\P4A_PAIRED_DATA_AUDIT.csv",
+  "data_sha256": "89bc919e51e10e32084043de86768cabdc51a9191ea03935d8ffc3d0d933bd15",
+  "formal_manifest_sha256": "04130fed80a77e748bd3cb825a30d106f2c252256223aded2dced2433b9dd388",
+  "original_model_sha256": "e343be3a03ece0e8a19d5329b53301397d0f0ce8e426488d93035fcc66660150",
+  "fold_key": [
+    "dataset",
+    "sequence_id"
+  ],
+  "expected_anchors": 39,
+  "expected_sequences": 21,
+  "expected_by_domain": {
+    "Bonn": [
+      9,
+      5
+    ],
+    "TUM": [
+      15,
+      8
+    ],
+    "ScanNet": [
+      15,
+      8
+    ]
+  },
+  "models": {
+    "M0": "training-fold anchor mean",
+    "M1": [
+      "global_l2",
+      "l0_l2",
+      "l1_l2",
+      "l2_l2",
+      "l3_l2"
+    ],
+    "M2": [
+      "global_l2",
+      "l0_l2",
+      "l1_l2",
+      "l2_l2",
+      "l3_l2",
+      "c3_l0",
+      "c3_l1",
+      "c3_l2",
+      "c3_l3"
+    ]
+  },
+  "ridge_alpha": 1.0,
+  "standardization": "training-fold anchor mean and population standard deviation; zero sd -> 1; unpenalized intercept",
+  "main_metric_unit": "sequence: mean anchor truth and mean anchor OOF prediction; each sequence equal weight",
+  "secondary_metric_unit": "anchor; each anchor equal weight",
+  "bootstrap": {
+    "seed": 20261110,
+    "replicates": 10000,
+    "method": "percentile resampling sequence-level fixed OOF errors; not model retraining; paired M1-M2",
+    "physical_inference": false
+  },
+  "coefficient_analysis": "mean absolute training-fold standardized coefficients, exploratory only; correlated features and fold-specific scaling preclude attribution",
+  "history": "pre-outcome for this run, inputs already used in prior development",
+  "physical_certification": "UNKNOWN; must not claim physical independence",
+  "no_gpu": true
+}

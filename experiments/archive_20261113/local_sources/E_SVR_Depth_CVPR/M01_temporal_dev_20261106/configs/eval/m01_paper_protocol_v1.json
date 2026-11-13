@@ -1,0 +1,12 @@
+{
+  "protocol_id": "M01_PAPER_V1",
+  "protocol_status": "candidate",
+  "methods": ["A_native", "A_K16", "P_multi_K16"],
+  "datasets": {"Bonn": {}, "TUM": {}, "ScanNet": {}, "Sintel": {}},
+  "frame_protocols": {"M01_RELEASE_CODE": "last_up_to_32_frames", "M01_FULL_SEQUENCE": "all_frames"},
+  "camera_gt": false,
+  "metrics": {"delta1": true, "delta1_ssi": true, "tau5": true, "tau5_ssi": true},
+  "temporal": {"pose_compensation": true, "threshold": 0.05, "flow_source": "pending_verification"},
+  "aggregate": {"dataset_weighting": "equal_dataset", "within_dataset": "pending_author_verification"},
+  "note": "Protocol specification only; not an executable runner config. Full author equivalence remains unverified."
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "protocol": "svr-depth-crosssource-supervised-v1",
+  "notes": [
+    "Replace every manifest path with a verified canonical per-sequence JSON manifest.",
+    "Do not point train manifests at TUM, ScanNet, Sintel or Bonn benchmark test data.",
+    "This config is a template only; no native dataset layout is assumed."
+  ],
+  "manifests": {
+    "train": {
+      "tartanair": ["manifests/train/tartanair/scene_a_cam0.json"],
+      "pointodyssey": ["manifests/train/pointodyssey/scene_b.json"],
+      "wildrgbd": ["manifests/train/wildrgbd/instance_c_take1.json"],
+      "hm3d": ["manifests/train/hm3d/scene_d_rendered.json"],
+      "waymo": ["manifests/train/waymo/segment_e_camera_front.json"]
+    },
+    "val": {
+      "tartanair": ["manifests/val/tartanair/scene_f_cam0.json"],
+      "pointodyssey": ["manifests/val/pointodyssey/scene_g.json"],
+      "wildrgbd": ["manifests/val/wildrgbd/instance_h_take1.json"],
+      "hm3d": ["manifests/val/hm3d/scene_i_rendered.json"],
+      "waymo": ["manifests/val/waymo/segment_j_camera_front.json"]
+    }
+  }
+}

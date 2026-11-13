@@ -1,0 +1,31 @@
+import csv,hashlib,json,re
+from pathlib import Path
+root=Path.cwd();work=root/'m05x_work/provenance_followup_20261110';out=root/'docs/data_audit/PROVENANCE_FOLLOWUP';remote=json.loads((work/'remote_result.json').read_text(encoding='utf8'));p2=root/'docs/m05x/p2b';anchors=json.loads((p2/'anchor_manifest.json').read_text(encoding='utf8'))['anchors'];formal={a['anchor_id'] for a in json.loads((root/'docs/m05x/p3c1_formal/anchor_manifest.json').read_text(encoding='utf8'))['formal_anchors']};target='db502b688624ba5f53191204af70c92727c432ad1362ed12806e03f90c75f518'
+def save(name,rows):
+ with (out/name).open('w',encoding='utf-8-sig',newline='') as f:w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
+by={r['split']:r for r in remote['tum']};assert by['train']['target_index']==0 and by['val']['target_index']==109
+tum_a=[x for x in anchors if x['dataset']=='TUM' and x['sequence'].endswith('/fr1_desk_val')];h4={}
+for x in anchors:
+ m=json.loads((p2/'runs'/x['anchor_id']/'capture_metadata.json').read_text(encoding='utf8'));i=x['age']+4;info=m['inputs'][i];h4[x['anchor_id']]={'key':info.get('gt_key',info.get('gt_path','')),'sha256':info.get('gt_sha256','')}
+direct=[k for k,v in h4.items() if v['sha256']==target];assert not direct
+timestamp=[];neighbors=[]
+for split in ['train','val']:
+ r=by[split];ns=r['neighbors'];at=next(n for n in ns if n['relative_offset']==0);depth=at['depth'];rgb=at['rgb'];others=[n for n in ns if n['relative_offset']!=0 and n['depth']['sha256']==depth['sha256']]
+ timestamp.append({'split':split,'sequence':r['sequence'],'frame_index':r['target_index'],'depth_hdf5_path':'/home/svrdepth/datasets/velodepth_evaluation/TUM.hdf5::'+at['depth_key'],'rgb_hdf5_path':'/home/svrdepth/datasets/velodepth_evaluation/TUM.hdf5::'+at['rgb_key'],'depth_sha256':depth['sha256'],'rgb_sha256':rgb['sha256'],'rgb_pixel_sha256':rgb['decoded_pixel_sha256'],'rgb_phash64':rgb['phash64'],'depth_actual_timestamp':'UNKNOWN','rgb_actual_timestamp':'UNKNOWN','timestamp_difference':'UNKNOWN','RGB_Depth_synchronization':'UNKNOWN','timestamp_evidence':'sequence metadata has no timestamp fields; image/depth object attrs empty; key text is not interpreted as time','available_before':sum(n['relative_offset']<0 for n in ns),'available_after':sum(n['relative_offset']>0 for n in ns),'same_depth_among_neighbors':len(others),'P2B_selected_sequence':'YES' if split=='val' else 'NO','P2B_H4_direct_key_or_hash':'NO_OBSERVED','training_use':'UNKNOWN; V4/V5 frozen training was Bonn13, TUM HDF5 train split is not proof of model training'})
+ for n in ns:
+  nr=n['rgb'];nd=n['depth'];same=[q['index'] for q in ns if q['index']!=n['index'] and q['depth']['sha256']==nd['sha256']]
+  neighbors.append({'split':split,'sequence':r['sequence'],'frame_index':n['index'],'relative_to_target':n['relative_offset'],'rgb_key':n['rgb_key'],'depth_key':n['depth_key'],'rgb_timestamp':'UNKNOWN','depth_timestamp':'UNKNOWN','rgb_sha256':nr['sha256'],'rgb_pixel_sha256':nr['decoded_pixel_sha256'],'rgb_phash64':nr['phash64'],'depth_sha256':nd['sha256'],'depth_pixel_sha256':nd['decoded_pixel_sha256'],'same_split_duplicate_depth_indices':';'.join(map(str,same)),'rgb_depth_sync':'UNKNOWN'})
+save('TUM_fr1_desk_timestamp_audit.csv',timestamp);save('TUM_fr1_desk_neighbor_frames.csv',neighbors)
+selected=json.loads((p2/'sequence_manifest.json').read_text(encoding='utf8'))['sequences'];scenes=[]
+for ds in ['TUM','ScanNet']:
+ for x in selected[ds]:
+  seq=x['sequence'];native=seq.rsplit('/',1)[-1].removesuffix('_val');desk=ds=='TUM' and native in ['fr1_desk','fr1_desk2','fr1_room'];match=re.fullmatch(r'(scene\d{4})_(\d{2})',native) if ds=='ScanNet' else None
+  scenes.append({'dataset':ds,'selected_sequence':seq,'native_label_candidate':native,'candidate_space_id':match.group(1) if match else '', 'candidate_scan_id':match.group(2) if match else '', 'recommended_conservative_scene_group':'TUM_FR1_DESK_AREA_PROVISIONAL' if desk else '', 'physical_scene_status':'PROVISIONAL' if desk else 'UNKNOWN','recording_identity_status':'UNKNOWN','session_status':'UNKNOWN','mapping_evidence':'official TUM describes desk/desk2/room as same office desks; HDF5-to-original conversion unverified' if desk else ('official ScanNet naming uses spaceId/scanId; same scan label appears in HDF5 train and val; original .sens/transform chain unverified' if match else 'no verified physical scene mapping'), 'source_reference':'https://webshare.cvg.cit.tum.de/g/rgbd/dataset/' if desk else ('https://github.com/ScanNet/ScanNet#data-organization' if match else ''),'separate_confirmed':'NO','original_conversion_chain':'NOT_FOUND','original_sens':'NOT_FOUND_IN_BOUNDED_SEARCH' if match else 'NOT_APPLICABLE_OR_NOT_FOUND'})
+save('TUM_ScanNet_scene_mapping.csv',scenes)
+risk=[]
+for a in anchors:
+ aid=a['anchor_id'];ds=a['dataset'];seq=a['sequence'];bonn=ds=='Bonn' and seq in ['person_tracking2','placing_nonobstructing_box','removing_nonobstructing_box'];desk=ds=='TUM' and any(seq.endswith('/'+x+'_val') for x in ['fr1_desk','fr1_desk2','fr1_room']);desk_exact=ds=='TUM' and seq.endswith('/fr1_desk_val');scannet=ds=='ScanNet';h=h4[aid]
+ risk.append({'anchor_id':aid,'dataset':ds,'sequence':seq,'age':a['age'],'P2B':'YES','P3C1_Formal_P4AB_eligible':'YES' if aid in formal else 'NO_PILOT_EXCLUDED','H4_depth_key_or_path':h['key'],'H4_depth_sha256':h['sha256'],'H4_same_as_known_duplicate':'UNKNOWN' if not h['sha256'] else ('YES' if h['sha256']==target else 'NO_OBSERVED'),'TUM_desk_split_duplicate_risk':'SAME_SEQUENCE_PROVENANCE_RISK_NOT_DIRECT_H4_DUPLICATE' if desk_exact else 'UNKNOWN_GENERAL' if ds=='TUM' else 'NOT_APPLICABLE','Bonn_shared_scene_risk':'PROVISIONAL_SAME_PHYSICAL_SCENE' if bonn else 'UNKNOWN' if ds=='Bonn' else 'NOT_APPLICABLE','TUM_conservative_scene_group':'TUM_FR1_DESK_AREA_PROVISIONAL' if desk else '', 'ScanNet_independence':'UNCONFIRMED' if scannet else 'NOT_APPLICABLE','descriptive_use':'YES_DEVELOPMENT_ONLY','sensitivity_recommendation':'retain; compare with conservative scene holdout; do not claim physical independence' if (bonn or desk or scannet) else 'retain; source identity still unresolved','delete_or_exclude':'NO'})
+save('P4AB_provenance_risk_matrix.csv',risk)
+print('OUTPUTS timestamp=',len(timestamp),'neighbors=',len(neighbors),'scene=',len(scenes),'anchors=',len(risk),'direct_h4',len(direct))
+

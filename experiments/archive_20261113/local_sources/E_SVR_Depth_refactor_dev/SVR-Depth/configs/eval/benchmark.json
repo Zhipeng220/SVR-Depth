@@ -1,0 +1,1 @@
+{"protocol":"benchmark","refresh_interval":16,"methods":["A","P_multi","O_multi","O_fast"],"implementation_status":"not_implemented"}
